@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>タイヤ点検アプリ（メモ順・v4）</title>
+<title>タイヤ点検アプリ（メモ順・v5）</title>
 <style>
   :root{ --pad:10px; --gap:8px; --radius:12px; --border:#e5e7eb; --bg:#fafafa; --brand:#2563eb; --muted:#667085;}
   *{ box-sizing:border-box; }
@@ -36,6 +36,8 @@
   @media (max-width:380px){
     .tire-row{ grid-template-columns: 1fr 1fr 1fr 40px; }
   }
+  /* submit focus highlight */
+  .focus-ring{ outline: 2px solid #2563eb; outline-offset: 2px; }
 </style>
 </head>
 <body>
@@ -144,6 +146,12 @@ function focusNext(currId){
   if(i>=0 && i<order.length-1){
     const next = document.getElementById(order[i+1]);
     if(next){ next.focus(); next.select?.(); }
+  }else if(i === order.length-1){
+    // 最後の入力（dot_rr）→ 完了ボタンへ
+    const btn = document.getElementById('submitBtn');
+    btn.classList.add('focus-ring');
+    btn.focus();
+    setTimeout(()=>btn.classList.remove('focus-ring'), 1200);
   }
 }
 
@@ -179,8 +187,8 @@ const resHeader = document.getElementById('res_header');
 const resLines = document.getElementById('res_lines');
 
 form.addEventListener('submit', () => {
-  const F = {};
-  order.forEach(id=> F[id] = document.getElementById(id).value);
+  const ids = order;
+  const F = {}; ids.forEach(id=> F[id] = document.getElementById(id).value);
   const station = document.querySelector('[name="station"]').value;
   const model = document.querySelector('[name="model"]').value;
   const plate = document.querySelector('[name="plate_full"]').value;
