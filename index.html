@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>タイヤ点検アプリ（メモ順・コンパクトv3）</title>
+<title>タイヤ点検アプリ（メモ順・v4）</title>
 <style>
   :root{ --pad:10px; --gap:8px; --radius:12px; --border:#e5e7eb; --bg:#fafafa; --brand:#2563eb; --muted:#667085;}
   *{ box-sizing:border-box; }
@@ -23,7 +23,6 @@
   .veh-row2{ display:grid; grid-template-columns: minmax(120px,1fr) minmax(180px,2fr); gap:8px; }
   .std-row{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
   .hint{ color:var(--muted); font-size:11px; }
-  /* タイヤ入力行：3入力 + 右端ラベル */
   .tire-list{ display:grid; gap:6px; }
   .tire-row{ display:grid; grid-template-columns: 1fr 1fr 1fr 46px; gap:6px; align-items:end; }
   .lab{ font-weight:700; text-align:right; color:#6b7280; padding-bottom:4px; }
@@ -83,27 +82,27 @@
     <p class="title section">タイヤ別入力</p>
     <div class="tire-list">
       <div class="tire-row">
-        <div class="inline"><div class="cap">残溝 mm</div><input id="tread_rf" type="text" inputmode="numeric" autocomplete="off" pattern="\d{1,3}(\.\d)?"></div>
-        <div class="inline"><div class="cap">空気圧kPa</div><input id="pre_rf" type="text" inputmode="numeric" autocomplete="off"></div>
-        <div class="inline"><div class="cap">製造年週</div><input id="dot_rf" type="text" inputmode="numeric" maxlength="4" pattern="\d{4}" placeholder="2421"></div>
+        <div class="inline"><div class="cap">残溝 mm</div><input id="tread_rf" type="text" inputmode="numeric"></div>
+        <div class="inline"><div class="cap">空気圧kPa</div><input id="pre_rf" type="text" inputmode="numeric"></div>
+        <div class="inline"><div class="cap">製造年週</div><input id="dot_rf" type="text" inputmode="numeric" maxlength="4"></div>
         <div class="lab">RF</div>
       </div>
       <div class="tire-row">
-        <div class="inline"><div class="cap">残溝 mm</div><input id="tread_lf" type="text" inputmode="numeric" autocomplete="off"></div>
-        <div class="inline"><div class="cap">空気圧kPa</div><input id="pre_lf" type="text" inputmode="numeric" autocomplete="off"></div>
-        <div class="inline"><div class="cap">製造年週</div><input id="dot_lf" type="text" inputmode="numeric" maxlength="4" pattern="\d{4}"></div>
+        <div class="inline"><div class="cap">残溝 mm</div><input id="tread_lf" type="text" inputmode="numeric"></div>
+        <div class="inline"><div class="cap">空気圧kPa</div><input id="pre_lf" type="text" inputmode="numeric"></div>
+        <div class="inline"><div class="cap">製造年週</div><input id="dot_lf" type="text" inputmode="numeric" maxlength="4"></div>
         <div class="lab">LF</div>
       </div>
       <div class="tire-row">
-        <div class="inline"><div class="cap">残溝 mm</div><input id="tread_lr" type="text" inputmode="numeric" autocomplete="off"></div>
-        <div class="inline"><div class="cap">空気圧kPa</div><input id="pre_lr" type="text" inputmode="numeric" autocomplete="off"></div>
-        <div class="inline"><div class="cap">製造年週</div><input id="dot_lr" type="text" inputmode="numeric" maxlength="4" pattern="\d{4}"></div>
+        <div class="inline"><div class="cap">残溝 mm</div><input id="tread_lr" type="text" inputmode="numeric"></div>
+        <div class="inline"><div class="cap">空気圧kPa</div><input id="pre_lr" type="text" inputmode="numeric"></div>
+        <div class="inline"><div class="cap">製造年週</div><input id="dot_lr" type="text" inputmode="numeric" maxlength="4"></div>
         <div class="lab">LR</div>
       </div>
       <div class="tire-row">
-        <div class="inline"><div class="cap">残溝 mm</div><input id="tread_rr" type="text" inputmode="numeric" autocomplete="off"></div>
-        <div class="inline"><div class="cap">空気圧kPa</div><input id="pre_rr" type="text" inputmode="numeric" autocomplete="off"></div>
-        <div class="inline"><div class="cap">製造年週</div><input id="dot_rr" type="text" inputmode="numeric" maxlength="4" pattern="\d{4}"></div>
+        <div class="inline"><div class="cap">残溝 mm</div><input id="tread_rr" type="text" inputmode="numeric"></div>
+        <div class="inline"><div class="cap">空気圧kPa</div><input id="pre_rr" type="text" inputmode="numeric"></div>
+        <div class="inline"><div class="cap">製造年週</div><input id="dot_rr" type="text" inputmode="numeric" maxlength="4"></div>
         <div class="lab">RR</div>
       </div>
     </div>
@@ -134,7 +133,6 @@ function nowJST(){
 }
 document.getElementById('now').textContent = nowJST();
 
-// オートアドバンスの順序
 const order = [
   'tread_rf','pre_rf','dot_rf',
   'tread_lf','pre_lf','dot_lf',
@@ -149,35 +147,26 @@ function focusNext(currId){
   }
 }
 
-// 残溝: 2桁「44」→「4.4」に自動変換して即次へ
 function autoFormatTread(el){
-  let v = el.value.replace(/[^0-9.]/g,'');
-  // 既に小数点を含む場合は何もしない
+  let v = el.value.replace(/[^0-9]/g,'');
   if(/\./.test(v)){ el.value = v; return; }
-  // 2桁の整数なら「x.y」に変換
   if(/^\d{2}$/.test(v)){
     el.value = v[0] + '.' + v[1];
     focusNext(el.id);
   }else{
-    el.value = v; // 1桁や3桁はそのまま（必要なら後で仕様調整）
+    el.value = v;
   }
 }
-
-// 空気圧: 2桁以上入ったら次へ（例: 24, 250など）
 function autoAdvancePressure(el){
   const v = el.value.replace(/[^0-9]/g,'');
   el.value = v;
-  if(v.length >= 2){ focusNext(el.id); }
+  if(v.length >= 3){ focusNext(el.id); }
 }
-
-// DOT: 4桁で次へ
 function autoAdvanceDOT(el){
   const v = el.value.replace(/[^0-9]/g,'');
   el.value = v.slice(0,4);
   if(el.value.length === 4){ focusNext(el.id); }
 }
-
-// イベント付与
 ['rf','lf','lr','rr'].forEach(pos=>{
   document.getElementById('tread_'+pos).addEventListener('input', e=> autoFormatTread(e.target));
   document.getElementById('pre_'+pos).addEventListener('input',  e=> autoAdvancePressure(e.target));
@@ -190,7 +179,6 @@ const resHeader = document.getElementById('res_header');
 const resLines = document.getElementById('res_lines');
 
 form.addEventListener('submit', () => {
-  // 収集
   const F = {};
   order.forEach(id=> F[id] = document.getElementById(id).value);
   const station = document.querySelector('[name="station"]').value;
@@ -198,7 +186,6 @@ form.addEventListener('submit', () => {
   const plate = document.querySelector('[name="plate_full"]').value;
   const std_f = document.querySelector('[name="std_f"]').value;
   const std_r = document.querySelector('[name="std_r"]').value;
-
   const stdSuffix = (std_f && std_r) ? `    ${std_f}-${std_r}` : '';
   const lines = [
     `RF ${F.tread_rf} ${F.pre_rf} ${F.dot_rf}${stdSuffix}`,
@@ -210,10 +197,8 @@ form.addEventListener('submit', () => {
   ].join('\n');
   resHeader.textContent = `${plate}\n${model}`;
   resLines.textContent = lines;
-
   form.style.display='none'; resultCard.style.display='block'; window.scrollTo({top:0,behavior:'smooth'});
 });
-
 document.getElementById('backBtn').addEventListener('click', () => {
   resultCard.style.display='none'; form.style.display='block'; window.scrollTo({top:0,behavior:'smooth'});
 });
