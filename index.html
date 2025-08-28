@@ -3,49 +3,54 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>タイヤ点検アプリ（メモ順・v7）</title>
+<title>タイヤ点検アプリ（ダークテーマ・オレンジ）</title>
 <style>
-  :root{ --pad:10px; --gap:8px; --radius:12px; --border:#e5e7eb; --bg:#fafafa; --brand:#2563eb; --muted:#667085;}
+  :root{
+    --pad:10px; --gap:8px; --radius:12px;
+    --border:#333; --bg:#000; --card:#1e1e1e;
+    --brand:#f97316; --muted:#aaa; --text:#fff;
+  }
   *{ box-sizing:border-box; }
-  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial; background:var(--bg); color:#111; }
-  header{ position:sticky; top:0; background:#fff; border-bottom:1px solid var(--border); padding:8px var(--pad); display:flex; gap:8px; align-items:center; z-index:10;}
-  header h1{ margin:0; font-size:15px; font-weight:700; }
+  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial;
+        background:var(--bg); color:var(--text); }
+  header{ position:sticky; top:0; background:#111; border-bottom:1px solid var(--border);
+          padding:8px var(--pad); display:flex; gap:8px; align-items:center; z-index:10;}
+  header h1{ margin:0; font-size:15px; font-weight:700; color:var(--text); }
   #now{ margin-left:auto; color:var(--muted); font-size:12px; }
   .wrap{ padding:var(--pad); }
-  .card{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:var(--pad); margin-bottom:var(--gap); }
-  .title{ font-size:14px; font-weight:700; margin:0 0 6px; }
-  label{ display:block; font-size:13px; color:#1f2937; margin:4px 0 4px; text-align:left; }
+  .card{ background:var(--card); border:1px solid var(--border); border-radius:12px;
+         padding:var(--pad); margin-bottom:var(--gap); }
+  .title{ font-size:14px; font-weight:700; margin:0 0 6px; color:var(--text); }
+  label{ display:block; font-size:13px; margin:4px 0 4px; text-align:left; color:var(--text); }
   input[type="text"]{
     width:100%; border:1px solid var(--border); border-radius:10px; padding:8px 10px;
-    font-size:16px; background:#fff; text-align:left;
+    font-size:16px; background:#000; color:var(--text);
   }
   .veh-rows{ display:grid; gap:8px; }
   .veh-row2{ display:grid; grid-template-columns: minmax(120px,1fr) minmax(180px,2fr); gap:8px; }
   .std-row{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
   .hint{ color:var(--muted); font-size:11px; }
-  /* シンプルな時間スタンプ領域 */
   .time-stamp{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
-  .stamp-card{ border:1px dashed var(--border); border-radius:10px; padding:8px; background:#fff; }
+  .stamp-card{ border:1px dashed var(--border); border-radius:10px; padding:8px; background:#111; }
   .stamp-head{ display:flex; align-items:center; justify-content:space-between; }
-  .stamp-title{ font-weight:700; font-size:13px; }
-  .stamp-btn{ appearance:none; border:1px solid var(--border); background:#fff; padding:6px 10px; border-radius:10px; font-size:13px; }
-  .stamp-time{ margin-top:6px; font-size:18px; font-weight:700; letter-spacing:0.5px; }
+  .stamp-title{ font-weight:700; font-size:13px; color:var(--text); }
+  .stamp-btn{ appearance:none; border:1px solid var(--border); background:#222; color:var(--text);
+              padding:6px 10px; border-radius:10px; font-size:13px; }
+  .stamp-time{ margin-top:6px; font-size:18px; font-weight:700; letter-spacing:0.5px; color:var(--text); }
   .muted{ color:var(--muted); font-size:12px; }
   .tire-list{ display:grid; gap:6px; }
   .tire-row{ display:grid; grid-template-columns: 1fr 1fr 1fr 46px; gap:6px; align-items:end; }
-  .lab{ font-weight:700; text-align:right; color:#6b7280; padding-bottom:4px; }
+  .lab{ font-weight:700; text-align:right; color:var(--muted); padding-bottom:4px; }
   .cap{ font-size:11px; color:var(--muted); margin-bottom:2px; text-align:left; }
   .inline{ display:grid; gap:2px; }
   .foot{ display:flex; gap:8px; flex-wrap:wrap; }
-  .btn{ appearance:none; border:1px solid var(--border); background:#fff; padding:9px 12px; border-radius:12px; font-size:16px; }
+  .btn{ appearance:none; border:1px solid var(--border); background:#222; color:var(--text);
+        padding:9px 12px; border-radius:12px; font-size:16px; }
   .btn.primary{ background:var(--brand); color:#fff; border-color:var(--brand); }
   .section{ margin-top:6px; padding-top:6px; border-top:1px dashed var(--border); }
-  .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space:pre-wrap; }
-  @media (max-width:380px){
-    .tire-row{ grid-template-columns: 1fr 1fr 1fr 40px; }
-  }
-  .focus-ring{ outline: 2px solid #2563eb; outline-offset: 2px; }
-  .ok-badge{ font-size:11px; color:#16a34a; margin-left:8px;}
+  .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space:pre-wrap; color:var(--text); }
+  @media (max-width:380px){ .tire-row{ grid-template-columns: 1fr 1fr 1fr 40px; } }
+  .focus-ring{ outline: 2px solid var(--brand); outline-offset: 2px; }
 </style>
 </head>
 <body>
@@ -58,50 +63,23 @@
   <form id="form" class="card" onsubmit="return false;">
     <p class="title">車両情報</p>
     <div class="veh-rows">
-      <div>
-        <label>ステーション名
-          <input type="text" name="station" required placeholder="例: タイムズ○○駅前第2">
-        </label>
-      </div>
+      <div><label>ステーション名 <input type="text" name="station" required></label></div>
       <div class="veh-row2">
-        <div>
-          <label>車種（モデル）
-            <input type="text" name="model" required placeholder="例: ノート">
-          </label>
-        </div>
-        <div>
-          <label>フルナンバー
-            <input type="text" name="plate_full" required maxlength="20" placeholder="例: 相模501ワ1234">
-          </label>
-        </div>
+        <div><label>車種 <input type="text" name="model" required></label></div>
+        <div><label>フルナンバー <input type="text" name="plate_full" required></label></div>
       </div>
       <div class="std-row">
-        <div>
-          <label>規定圧（前）kPa <span class="hint">任意</span>
-            <input type="text" name="std_f" inputmode="numeric" placeholder="例: 260">
-          </label>
-        </div>
-        <div>
-          <label>規定圧（後）kPa <span class="hint">任意</span>
-            <input type="text" name="std_r" inputmode="numeric" placeholder="例: 260">
-          </label>
-        </div>
+        <div><label>規定圧（前）kPa <span class="hint">任意</span><input type="text" name="std_f" inputmode="numeric"></label></div>
+        <div><label>規定圧（後）kPa <span class="hint">任意</span><input type="text" name="std_r" inputmode="numeric"></label></div>
       </div>
-      <!-- シンプルな時間記録 -->
       <div class="time-stamp">
         <div class="stamp-card">
-          <div class="stamp-head">
-            <div class="stamp-title">解錠</div>
-            <button class="stamp-btn" type="button" id="unlockBtn">記録</button>
-          </div>
+          <div class="stamp-head"><div class="stamp-title">解錠</div><button class="stamp-btn" type="button" id="unlockBtn">記録</button></div>
           <div class="stamp-time" id="unlockTime">--:--</div>
           <div class="muted" id="unlockNote"></div>
         </div>
         <div class="stamp-card">
-          <div class="stamp-head">
-            <div class="stamp-title">施錠</div>
-            <button class="stamp-btn" type="button" id="lockBtn">記録</button>
-          </div>
+          <div class="stamp-head"><div class="stamp-title">施錠</div><button class="stamp-btn" type="button" id="lockBtn">記録</button></div>
           <div class="stamp-time" id="lockTime">--:--</div>
           <div class="muted" id="lockNote"></div>
         </div>
@@ -110,30 +88,22 @@
 
     <p class="title section">タイヤ別入力</p>
     <div class="tire-list">
-      <div class="tire-row">
-        <div class="inline"><div class="cap">残溝 mm</div><input id="tread_rf" type="text" inputmode="numeric"></div>
-        <div class="inline"><div class="cap">空気圧kPa</div><input id="pre_rf" type="text" inputmode="numeric"></div>
+      <div class="tire-row"><div class="inline"><div class="cap">残溝</div><input id="tread_rf" type="text" inputmode="numeric"></div>
+        <div class="inline"><div class="cap">空気圧</div><input id="pre_rf" type="text" inputmode="numeric"></div>
         <div class="inline"><div class="cap">製造年週</div><input id="dot_rf" type="text" inputmode="numeric" maxlength="4"></div>
-        <div class="lab">RF</div>
-      </div>
-      <div class="tire-row">
-        <div class="inline"><div class="cap">残溝 mm</div><input id="tread_lf" type="text" inputmode="numeric"></div>
-        <div class="inline"><div class="cap">空気圧kPa</div><input id="pre_lf" type="text" inputmode="numeric"></div>
+        <div class="lab">RF</div></div>
+      <div class="tire-row"><div class="inline"><div class="cap">残溝</div><input id="tread_lf" type="text" inputmode="numeric"></div>
+        <div class="inline"><div class="cap">空気圧</div><input id="pre_lf" type="text" inputmode="numeric"></div>
         <div class="inline"><div class="cap">製造年週</div><input id="dot_lf" type="text" inputmode="numeric" maxlength="4"></div>
-        <div class="lab">LF</div>
-      </div>
-      <div class="tire-row">
-        <div class="inline"><div class="cap">残溝 mm</div><input id="tread_lr" type="text" inputmode="numeric"></div>
-        <div class="inline"><div class="cap">空気圧kPa</div><input id="pre_lr" type="text" inputmode="numeric"></div>
+        <div class="lab">LF</div></div>
+      <div class="tire-row"><div class="inline"><div class="cap">残溝</div><input id="tread_lr" type="text" inputmode="numeric"></div>
+        <div class="inline"><div class="cap">空気圧</div><input id="pre_lr" type="text" inputmode="numeric"></div>
         <div class="inline"><div class="cap">製造年週</div><input id="dot_lr" type="text" inputmode="numeric" maxlength="4"></div>
-        <div class="lab">LR</div>
-      </div>
-      <div class="tire-row">
-        <div class="inline"><div class="cap">残溝 mm</div><input id="tread_rr" type="text" inputmode="numeric"></div>
-        <div class="inline"><div class="cap">空気圧kPa</div><input id="pre_rr" type="text" inputmode="numeric"></div>
+        <div class="lab">LR</div></div>
+      <div class="tire-row"><div class="inline"><div class="cap">残溝</div><input id="tread_rr" type="text" inputmode="numeric"></div>
+        <div class="inline"><div class="cap">空気圧</div><input id="pre_rr" type="text" inputmode="numeric"></div>
         <div class="inline"><div class="cap">製造年週</div><input id="dot_rr" type="text" inputmode="numeric" maxlength="4"></div>
-        <div class="lab">RR</div>
-      </div>
+        <div class="lab">RR</div></div>
     </div>
 
     <div class="foot section">
@@ -143,143 +113,57 @@
   </form>
 
   <div id="resultCard" class="card" style="display:none;">
-    <p class="title">結果（メモ形式）</p>
+    <p class="title">結果</p>
     <div class="mono" id="res_header"></div>
     <div class="mono" id="res_times"></div>
     <div class="mono" id="res_lines"></div>
-    <div class="foot section">
-      <button class="btn" id="backBtn">入力に戻る</button>
-      <button class="btn primary" id="copyBtn">表示をコピー</button>
-    </div>
+    <div class="foot section"><button class="btn" id="backBtn">入力に戻る</button></div>
   </div>
 </div>
 
 <script>
-function nowJST(){
-  const d = new Date(); const utc = d.getTime()+d.getTimezoneOffset()*60000; const jst = new Date(utc+9*60*60000);
-  const HH = String(jst.getHours()).padStart(2,'0'); const MM = String(jst.getMinutes()).padStart(2,'0');
-  const mm = String(jst.getMonth()+1).padStart(2,'0'); const dd = String(jst.getDate()).padStart(2,'0');
-  return mm+'/'+dd+' '+HH+':'+MM;
-}
-function nowHM(){
-  const d = new Date(); const utc = d.getTime()+d.getTimezoneOffset()*60000; const jst = new Date(utc+9*60*60000);
-  const HH = String(jst.getHours()).padStart(2,'0'); const MM = String(jst.getMinutes()).padStart(2,'0');
-  return `${HH}:${MM}`;
-}
-document.getElementById('now').textContent = nowJST();
+function nowJST(){const d=new Date();const utc=d.getTime()+d.getTimezoneOffset()*60000;const jst=new Date(utc+9*60*60000);
+  const HH=String(jst.getHours()).padStart(2,'0');const MM=String(jst.getMinutes()).padStart(2,'0');const mm=String(jst.getMonth()+1).padStart(2,'0');const dd=String(jst.getDate()).padStart(2,'0');
+  return mm+'/'+dd+' '+HH+':'+MM;}
+function nowHM(){const d=new Date();const utc=d.getTime()+d.getTimezoneOffset()*60000;const jst=new Date(utc+9*60*60000);
+  const HH=String(jst.getHours()).padStart(2,'0');const MM=String(jst.getMinutes()).padStart(2,'0');return `${HH}:${MM}`;}
+document.getElementById('now').textContent=nowJST();
 
-// シンプル記録：解錠/施錠
-const unlockBtn = document.getElementById('unlockBtn');
-const lockBtn = document.getElementById('lockBtn');
-const unlockTimeEl = document.getElementById('unlockTime');
-const lockTimeEl = document.getElementById('lockTime');
-const unlockNote = document.getElementById('unlockNote');
-const lockNote = document.getElementById('lockNote');
+const unlockBtn=document.getElementById('unlockBtn');const lockBtn=document.getElementById('lockBtn');
+const unlockTimeEl=document.getElementById('unlockTime');const lockTimeEl=document.getElementById('lockTime');
+const unlockNote=document.getElementById('unlockNote');const lockNote=document.getElementById('lockNote');
+function stamp(el,noteEl){const t=nowHM();const prev=el.textContent;el.textContent=t;
+  if(prev && prev!=="--:--"){noteEl.textContent="更新:"+t;}else{noteEl.textContent="記録しました";}
+  setTimeout(()=>noteEl.textContent="",1500);}
+unlockBtn.addEventListener('click',()=>{stamp(unlockTimeEl,unlockNote);lockBtn.focus();});
+lockBtn.addEventListener('click',()=>{stamp(lockTimeEl,lockNote);document.getElementById('tread_rf').focus();});
 
-function stamp(el, noteEl){
-  const t = nowHM();
-  const prev = el.textContent;
-  el.textContent = t;
-  if(prev && prev !== '--:--'){ noteEl.textContent = '更新: ' + t; }
-  else { noteEl.textContent = '記録しました'; }
-  setTimeout(()=> noteEl.textContent = '', 1500);
-}
+const order=['tread_rf','pre_rf','dot_rf','tread_lf','pre_lf','dot_lf','tread_lr','pre_lr','dot_lr','tread_rr','pre_rr','dot_rr'];
+function focusNext(currId){const i=order.indexOf(currId);
+  if(i>=0 && i<order.length-1){const next=document.getElementById(order[i+1]);if(next){next.focus();next.select?.();}}
+  else if(i===order.length-1){const btn=document.getElementById('submitBtn');btn.classList.add('focus-ring');btn.focus();setTimeout(()=>btn.classList.remove('focus-ring'),1200);}}
+function autoFormatTread(el){let v=el.value.replace(/[^0-9]/g,'');if(/\./.test(v)){el.value=v;return;}
+  if(/^\d{2}$/.test(v)){el.value=v[0]+'.'+v[1];focusNext(el.id);}else{el.value=v;}}
+function autoAdvancePressure(el){const v=el.value.replace(/[^0-9]/g,'');el.value=v;if(v.length>=3){focusNext(el.id);}}
+function autoAdvanceDOT(el){const v=el.value.replace(/[^0-9]/g,'');el.value=v.slice(0,4);if(el.value.length===4){focusNext(el.id);}}
+['rf','lf','lr','rr'].forEach(pos=>{document.getElementById('tread_'+pos).addEventListener('input',e=>autoFormatTread(e.target));
+  document.getElementById('pre_'+pos).addEventListener('input',e=>autoAdvancePressure(e.target));
+  document.getElementById('dot_'+pos).addEventListener('input',e=>autoAdvanceDOT(e.target));});
 
-unlockBtn.addEventListener('click', ()=>{
-  stamp(unlockTimeEl, unlockNote);
-  // 次は施錠の記録ボタンへ
-  lockBtn.focus();
-});
-lockBtn.addEventListener('click', ()=>{
-  stamp(lockTimeEl, lockNote);
-  // 次は最初の残溝へ
-  document.getElementById('tread_rf').focus();
-});
-
-const order = [
-  'tread_rf','pre_rf','dot_rf',
-  'tread_lf','pre_lf','dot_lf',
-  'tread_lr','pre_lr','dot_lr',
-  'tread_rr','pre_rr','dot_rr'
-];
-function focusNext(currId){
-  const i = order.indexOf(currId);
-  if(i>=0 && i<order.length-1){
-    const next = document.getElementById(order[i+1]);
-    if(next){ next.focus(); next.select?.(); }
-  }else if(i === order.length-1){
-    const btn = document.getElementById('submitBtn');
-    btn.classList.add('focus-ring');
-    btn.focus();
-    setTimeout(()=>btn.classList.remove('focus-ring'), 1200);
-  }
-}
-function autoFormatTread(el){
-  let v = el.value.replace(/[^0-9]/g,'');
-  if(/\./.test(v)){ el.value = v; return; }
-  if(/^\d{2}$/.test(v)){
-    el.value = v[0] + '.' + v[1];
-    focusNext(el.id);
-  }else{
-    el.value = v;
-  }
-}
-function autoAdvancePressure(el){
-  const v = el.value.replace(/[^0-9]/g,'');
-  el.value = v;
-  if(v.length >= 3){ focusNext(el.id); }
-}
-function autoAdvanceDOT(el){
-  const v = el.value.replace(/[^0-9]/g,'');
-  el.value = v.slice(0,4);
-  if(el.value.length === 4){ focusNext(el.id); }
-}
-['rf','lf','lr','rr'].forEach(pos=>{
-  document.getElementById('tread_'+pos).addEventListener('input', e=> autoFormatTread(e.target));
-  document.getElementById('pre_'+pos).addEventListener('input',  e=> autoAdvancePressure(e.target));
-  document.getElementById('dot_'+pos).addEventListener('input',  e=> autoAdvanceDOT(e.target));
-});
-
-const form = document.getElementById('form');
-const resultCard = document.getElementById('resultCard');
-const resHeader = document.getElementById('res_header');
-const resTimes = document.getElementById('res_times');
-const resLines = document.getElementById('res_lines');
-
-form.addEventListener('submit', () => {
-  const F = {};
-  order.forEach(id=> F[id] = document.getElementById(id).value);
-  const model = document.querySelector('[name="model"]').value;
-  const plate = document.querySelector('[name="plate_full"]').value;
-  const std_f = document.querySelector('[name="std_f"]').value;
-  const std_r = document.querySelector('[name="std_r"]').value;
-  const unlock = unlockTimeEl.textContent || '--:--';
-  const lock = lockTimeEl.textContent || '--:--';
-
-  const stdSuffix = (std_f && std_r) ? `    ${std_f}-${std_r}` : '';
-  const lines = [
-    `RF ${F.tread_rf} ${F.pre_rf} ${F.dot_rf}${stdSuffix}`,
-    `LF ${F.tread_lf} ${F.pre_lf} ${F.dot_lf}`,
-    `LR ${F.tread_lr} ${F.pre_lr} ${F.dot_lr}`,
-    `RR ${F.tread_rr} ${F.pre_rr} ${F.dot_rr}`,
-    '',
-    nowJST()
-  ].join('\n');
-
-  resHeader.textContent = `${plate}\n${model}`;
-  resTimes.textContent = `解錠 ${unlock}    施錠 ${lock}`;
-  resLines.textContent = lines;
-
-  form.style.display='none'; resultCard.style.display='block'; window.scrollTo({top:0,behavior:'smooth'});
-});
-
-document.getElementById('backBtn').addEventListener('click', () => {
-  resultCard.style.display='none'; form.style.display='block'; window.scrollTo({top:0,behavior:'smooth'});
-});
-document.getElementById('copyBtn').addEventListener('click', async () => {
-  const txt = (resHeader.textContent + '\n' + resTimes.textContent + '\n' + resLines.textContent).trim();
-  try{ await navigator.clipboard.writeText(txt); const b=document.getElementById('copyBtn'); b.textContent='コピーしました'; setTimeout(()=>b.textContent='表示をコピー',1600);}catch(e){ alert('コピー失敗: '+e); }
-});
+const form=document.getElementById('form');const resultCard=document.getElementById('resultCard');
+const resHeader=document.getElementById('res_header');const resTimes=document.getElementById('res_times');const resLines=document.getElementById('res_lines');
+form.addEventListener('submit',()=>{const F={};order.forEach(id=>F[id]=document.getElementById(id).value);
+  const model=document.querySelector('[name="model"]').value;const plate=document.querySelector('[name="plate_full"]').value;
+  const std_f=document.querySelector('[name="std_f"]').value;const std_r=document.querySelector('[name="std_r"]').value;
+  const unlock=unlockTimeEl.textContent||'--:--';const lock=lockTimeEl.textContent||'--:--';
+  const stdSuffix=(std_f&&std_r)?`    ${std_f}-${std_r}`:'';
+  const lines=[`RF ${F.tread_rf} ${F.pre_rf} ${F.dot_rf}${stdSuffix}`,
+               `LF ${F.tread_lf} ${F.pre_lf} ${F.dot_lf}`,
+               `LR ${F.tread_lr} ${F.pre_lr} ${F.dot_lr}`,
+               `RR ${F.tread_rr} ${F.pre_rr} ${F.dot_rr}`,'',nowJST()].join('\n');
+  resHeader.textContent=`${plate}\n${model}`;resTimes.textContent=`解錠 ${unlock}    施錠 ${lock}`;resLines.textContent=lines;
+  form.style.display='none';resultCard.style.display='block';window.scrollTo({top:0,behavior:'smooth'});});
+document.getElementById('backBtn').addEventListener('click',()=>{resultCard.style.display='none';form.style.display='block';window.scrollTo({top:0,behavior:'smooth'});});
 </script>
 </body>
 </html>
