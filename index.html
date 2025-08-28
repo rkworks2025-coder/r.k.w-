@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>タイヤ点検アプリ（メモ順・v5）</title>
+<title>タイヤ点検アプリ（メモ順・v6）</title>
 <style>
   :root{ --pad:10px; --gap:8px; --radius:12px; --border:#e5e7eb; --bg:#fafafa; --brand:#2563eb; --muted:#667085;}
   *{ box-sizing:border-box; }
@@ -15,13 +15,14 @@
   .card{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:var(--pad); margin-bottom:var(--gap); }
   .title{ font-size:14px; font-weight:700; margin:0 0 6px; }
   label{ display:block; font-size:13px; color:#1f2937; margin:4px 0 4px; text-align:left; }
-  input[type="text"],input[type="number"]{
+  input[type="text"],input[type="number"],input[type="time"]{
     width:100%; border:1px solid var(--border); border-radius:10px; padding:8px 10px;
     font-size:16px; background:#fff; text-align:left;
   }
   .veh-rows{ display:grid; gap:8px; }
   .veh-row2{ display:grid; grid-template-columns: minmax(120px,1fr) minmax(180px,2fr); gap:8px; }
   .std-row{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+  .time-row{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
   .hint{ color:var(--muted); font-size:11px; }
   .tire-list{ display:grid; gap:6px; }
   .tire-row{ display:grid; grid-template-columns: 1fr 1fr 1fr 46px; gap:6px; align-items:end; }
@@ -30,13 +31,13 @@
   .inline{ display:grid; gap:2px; }
   .foot{ display:flex; gap:8px; flex-wrap:wrap; }
   .btn{ appearance:none; border:1px solid var(--border); background:#fff; padding:9px 12px; border-radius:12px; font-size:16px; }
+  .btn.small{ padding:6px 8px; font-size:13px; }
   .btn.primary{ background:var(--brand); color:#fff; border-color:var(--brand); }
   .section{ margin-top:6px; padding-top:6px; border-top:1px dashed var(--border); }
   .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space:pre-wrap; }
   @media (max-width:380px){
     .tire-row{ grid-template-columns: 1fr 1fr 1fr 40px; }
   }
-  /* submit focus highlight */
   .focus-ring{ outline: 2px solid #2563eb; outline-offset: 2px; }
 </style>
 </head>
@@ -79,6 +80,24 @@
           </label>
         </div>
       </div>
+      <div class="time-row">
+        <div>
+          <label>解錠時刻（開錠）
+            <div class="inline">
+              <input type="time" name="unlock" id="unlock">
+              <button class="btn small" type="button" id="unlockNow">今</button>
+            </div>
+          </label>
+        </div>
+        <div>
+          <label>施錠時刻（施錠）
+            <div class="inline">
+              <input type="time" name="lock" id="lock">
+              <button class="btn small" type="button" id="lockNow">今</button>
+            </div>
+          </label>
+        </div>
+      </div>
     </div>
 
     <p class="title section">タイヤ別入力</p>
@@ -118,6 +137,7 @@
   <div id="resultCard" class="card" style="display:none;">
     <p class="title">結果（メモ形式）</p>
     <div class="mono" id="res_header"></div>
+    <div class="mono" id="res_times"></div>
     <div class="mono" id="res_lines"></div>
     <div class="foot section">
       <button class="btn" id="backBtn">入力に戻る</button>
@@ -133,7 +153,25 @@ function nowJST(){
   const mm = String(jst.getMonth()+1).padStart(2,'0'); const dd = String(jst.getDate()).padStart(2,'0');
   return mm+'/'+dd+' '+HH+':'+MM;
 }
+function nowHM(){
+  const d = new Date(); const utc = d.getTime()+d.getTimezoneOffset()*60000; const jst = new Date(utc+9*60*60000);
+  const HH = String(jst.getHours()).padStart(2,'0'); const MM = String(jst.getMinutes()).padStart(2,'0');
+  return `${HH}:${MM}`;
+}
 document.getElementById('now').textContent = nowJST();
+
+// QUICK TIME FILL
+document.getElementById('unlockNow').addEventListener('click', ()=>{
+  const el = document.getElementById('unlock');
+  el.value = nowHM();
+  document.getElementById('lock').focus();
+});
+document.getElementById('lockNow').addEventListener('click', ()=>{
+  const el = document.getElementById('lock');
+  el.value = nowHM();
+  // スクロール無しで次（残溝RF）へ
+  document.getElementById('tread_rf').focus();
+});
 
 const order = [
   'tread_rf','pre_rf','dot_rf',
@@ -147,14 +185,12 @@ function focusNext(currId){
     const next = document.getElementById(order[i+1]);
     if(next){ next.focus(); next.select?.(); }
   }else if(i === order.length-1){
-    // 最後の入力（dot_rr）→ 完了ボタンへ
     const btn = document.getElementById('submitBtn');
     btn.classList.add('focus-ring');
     btn.focus();
     setTimeout(()=>btn.classList.remove('focus-ring'), 1200);
   }
 }
-
 function autoFormatTread(el){
   let v = el.value.replace(/[^0-9]/g,'');
   if(/\./.test(v)){ el.value = v; return; }
@@ -184,16 +220,19 @@ function autoAdvanceDOT(el){
 const form = document.getElementById('form');
 const resultCard = document.getElementById('resultCard');
 const resHeader = document.getElementById('res_header');
+const resTimes = document.getElementById('res_times');
 const resLines = document.getElementById('res_lines');
 
 form.addEventListener('submit', () => {
-  const ids = order;
-  const F = {}; ids.forEach(id=> F[id] = document.getElementById(id).value);
-  const station = document.querySelector('[name="station"]').value;
+  const F = {};
+  order.forEach(id=> F[id] = document.getElementById(id).value);
   const model = document.querySelector('[name="model"]').value;
   const plate = document.querySelector('[name="plate_full"]').value;
   const std_f = document.querySelector('[name="std_f"]').value;
   const std_r = document.querySelector('[name="std_r"]').value;
+  const unlock = document.getElementById('unlock').value || '--:--';
+  const lock = document.getElementById('lock').value || '--:--';
+
   const stdSuffix = (std_f && std_r) ? `    ${std_f}-${std_r}` : '';
   const lines = [
     `RF ${F.tread_rf} ${F.pre_rf} ${F.dot_rf}${stdSuffix}`,
@@ -203,15 +242,19 @@ form.addEventListener('submit', () => {
     '',
     nowJST()
   ].join('\n');
+
   resHeader.textContent = `${plate}\n${model}`;
+  resTimes.textContent = `解錠 ${unlock}    施錠 ${lock}`;
   resLines.textContent = lines;
+
   form.style.display='none'; resultCard.style.display='block'; window.scrollTo({top:0,behavior:'smooth'});
 });
+
 document.getElementById('backBtn').addEventListener('click', () => {
   resultCard.style.display='none'; form.style.display='block'; window.scrollTo({top:0,behavior:'smooth'});
 });
 document.getElementById('copyBtn').addEventListener('click', async () => {
-  const txt = (resHeader.textContent + '\n' + resLines.textContent).trim();
+  const txt = (resHeader.textContent + '\n' + resTimes.textContent + '\n' + resLines.textContent).trim();
   try{ await navigator.clipboard.writeText(txt); const b=document.getElementById('copyBtn'); b.textContent='コピーしました'; setTimeout(()=>b.textContent='表示をコピー',1600);}catch(e){ alert('コピー失敗: '+e); }
 });
 </script>
