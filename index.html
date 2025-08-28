@@ -3,42 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>タイヤ点検アプリ（単画面・メモ順）</title>
+<title>タイヤ点検アプリ（メモ順・コンパクト）</title>
 <style>
-  :root{ --pad:14px; --gap:12px; --radius:12px; --border:#e5e7eb; --bg:#f7f7f9; --brand:#2563eb; --muted:#667085;}
+  :root{ --pad:10px; --gap:8px; --radius:12px; --border:#e5e7eb; --bg:#fafafa; --brand:#2563eb; --muted:#667085;}
   *{ box-sizing:border-box; }
   body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial; background:var(--bg); color:#111; }
-  header{ position:sticky; top:0; background:#fff; border-bottom:1px solid var(--border); padding:12px var(--pad); display:flex; gap:10px; align-items:center; z-index:10;}
-  header h1{ margin:0; font-size:16px; font-weight:700; }
-  #now{ margin-left:auto; color:var(--muted); font-size:13px; }
+  header{ position:sticky; top:0; background:#fff; border-bottom:1px solid var(--border); padding:8px var(--pad); display:flex; gap:8px; align-items:center; z-index:10;}
+  header h1{ margin:0; font-size:15px; font-weight:700; }
+  #now{ margin-left:auto; color:var(--muted); font-size:12px; }
   .wrap{ padding:var(--pad); }
   .card{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:var(--pad); margin-bottom:var(--gap); }
-  .title{ font-size:15px; font-weight:700; margin:0 0 8px; }
-  label{ display:block; font-size:13px; color:#374151; }
-  input[type="text"],input[type="number"]{ width:100%; border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:16px; background:#fff; }
-  .veh-rows{ display:grid; gap:10px; }
-  .veh-row2{ display:grid; grid-template-columns: minmax(120px,1fr) minmax(180px,2fr); gap:10px; }
-  .hint{ color:var(--muted); font-size:12px; }
-  /* memo style rows */
-  .tire-list{ display:grid; gap:10px; }
-  .tire-row{ display:grid; grid-template-columns: 64px 1fr 1fr 1fr; gap:8px; align-items:end; }
-  .tire-row .lab{ font-weight:700; text-align:left; padding-bottom:6px; }
-  .inline{ display:grid; gap:6px; }
-  .cap{ font-size:12px; color:var(--muted); margin-bottom:4px; }
-  .foot{ display:flex; gap:10px; flex-wrap:wrap; }
-  .btn{ appearance:none; border:1px solid var(--border); background:#fff; padding:10px 14px; border-radius:12px; font-size:16px; }
+  .title{ font-size:14px; font-weight:700; margin:0 0 6px; }
+  label{ display:block; font-size:13px; color:#1f2937; margin:4px 0 4px; text-align:left; }
+  input[type="text"],input[type="number"]{
+    width:100%; border:1px solid var(--border); border-radius:10px; padding:8px 10px;
+    font-size:16px; background:#fff; text-align:left;
+  }
+  /* 車両情報 */
+  .veh-rows{ display:grid; gap:8px; }
+  .veh-row2{ display:grid; grid-template-columns: minmax(120px,1fr) minmax(180px,2fr); gap:8px; }
+  /* 規定圧は均等(1:1) */
+  .std-row{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+  .hint{ color:var(--muted); font-size:11px; }
+  /* タイヤ入力（左手親指前提で全左寄せ） */
+  .tire-list{ display:grid; gap:6px; }
+  .tire-row{ display:grid; grid-template-columns: 46px 1fr 1fr 1fr; gap:6px; align-items:end; }
+  .lab{ font-weight:700; text-align:left; padding-bottom:4px; }
+  .cap{ font-size:11px; color:var(--muted); margin-bottom:2px; text-align:left; }
+  .inline{ display:grid; gap:2px; }
+  /* ボタン行は上詰めでも見えるよう margin少なめ */
+  .foot{ display:flex; gap:8px; flex-wrap:wrap; }
+  .btn{ appearance:none; border:1px solid var(--border); background:#fff; padding:9px 12px; border-radius:12px; font-size:16px; }
   .btn.primary{ background:var(--brand); color:#fff; border-color:var(--brand); }
-  .section{ margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); }
+  .section{ margin-top:6px; padding-top:6px; border-top:1px dashed var(--border); }
   .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space:pre-wrap; }
-  .badge{ display:inline-block; font-size:12px; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#1d4ed8; }
   @media (max-width:380px){
-    .tire-row{ grid-template-columns: 52px 1fr 1fr 1fr; }
+    .tire-row{ grid-template-columns: 42px 1fr 1fr 1fr; }
   }
 </style>
 </head>
 <body>
 <header>
-  <h1>タイヤ点検（メモ順）</h1>
+  <h1>タイヤ点検</h1>
   <span id="now"></span>
 </header>
 
@@ -63,7 +69,7 @@
           </label>
         </div>
       </div>
-      <div class="veh-row2">
+      <div class="std-row">
         <div>
           <label>規定圧（前）kPa <span class="hint">任意</span>
             <input type="number" name="std_f" inputmode="numeric" placeholder="例: 260">
@@ -77,30 +83,30 @@
       </div>
     </div>
 
-    <p class="title section">タイヤ別入力（メモの並び：RF→LF→LR→RR）</p>
+    <p class="title section">タイヤ別入力</p>
     <div class="tire-list">
       <div class="tire-row">
         <div class="lab">RF</div>
         <div class="inline"><div class="cap">残溝 mm</div><input type="number" step="0.1" name="tread_rf" required></div>
-        <div class="inline"><div class="cap">空気圧（調整前）kPa</div><input type="number" step="1" name="pre_rf" required></div>
+        <div class="inline"><div class="cap">空気圧kPa</div><input type="number" step="1" name="pre_rf" required></div>
         <div class="inline"><div class="cap">製造年週</div><input type="text" pattern="\d{4}" maxlength="4" name="dot_rf" required placeholder="2421"></div>
       </div>
       <div class="tire-row">
         <div class="lab">LF</div>
         <div class="inline"><div class="cap">残溝 mm</div><input type="number" step="0.1" name="tread_lf" required></div>
-        <div class="inline"><div class="cap">空気圧（調整前）kPa</div><input type="number" step="1" name="pre_lf" required></div>
+        <div class="inline"><div class="cap">空気圧kPa</div><input type="number" step="1" name="pre_lf" required></div>
         <div class="inline"><div class="cap">製造年週</div><input type="text" pattern="\d{4}" maxlength="4" name="dot_lf" required></div>
       </div>
       <div class="tire-row">
         <div class="lab">LR</div>
         <div class="inline"><div class="cap">残溝 mm</div><input type="number" step="0.1" name="tread_lr" required></div>
-        <div class="inline"><div class="cap">空気圧（調整前）kPa</div><input type="number" step="1" name="pre_lr" required></div>
+        <div class="inline"><div class="cap">空気圧kPa</div><input type="number" step="1" name="pre_lr" required></div>
         <div class="inline"><div class="cap">製造年週</div><input type="text" pattern="\d{4}" maxlength="4" name="dot_lr" required></div>
       </div>
       <div class="tire-row">
         <div class="lab">RR</div>
         <div class="inline"><div class="cap">残溝 mm</div><input type="number" step="0.1" name="tread_rr" required></div>
-        <div class="inline"><div class="cap">空気圧（調整前）kPa</div><input type="number" step="1" name="pre_rr" required></div>
+        <div class="inline"><div class="cap">空気圧kPa</div><input type="number" step="1" name="pre_rr" required></div>
         <div class="inline"><div class="cap">製造年週</div><input type="text" pattern="\d{4}" maxlength="4" name="dot_rr" required></div>
       </div>
     </div>
@@ -127,9 +133,9 @@ function nowJST(){
   const d = new Date(); const utc = d.getTime()+d.getTimezoneOffset()*60000; const jst = new Date(utc+9*60*60000);
   const HH = String(jst.getHours()).padStart(2,'0'); const MM = String(jst.getMinutes()).padStart(2,'0');
   const mm = String(jst.getMonth()+1).padStart(2,'0'); const dd = String(jst.getDate()).padStart(2,'0');
-  return {ts: mm+'/'+dd+' '+HH+':'+MM, h:HH, m:MM};
+  return mm+'/'+dd+' '+HH+':'+MM;
 }
-document.getElementById('now').textContent = nowJST().ts;
+document.getElementById('now').textContent = nowJST();
 
 const form = document.getElementById('form');
 const resultCard = document.getElementById('resultCard');
@@ -138,14 +144,17 @@ const resLines = document.getElementById('res_lines');
 
 form.addEventListener('submit', () => {
   const F = Object.fromEntries(new FormData(form).entries());
+  const stdSuffix = (F.std_f && F.std_r) ? `    ${F.std_f}-${F.std_r}` : '';
   const lines = [
-    `RF ${F.tread_rf} ${F.pre_rf} ${F.dot_rf}` + (F.std_f && F.std_r ? `    ${F.std_f}-${F.std_r}` : ''),
+    `RF ${F.tread_rf} ${F.pre_rf} ${F.dot_rf}${stdSuffix}`,
     `LF ${F.tread_lf} ${F.pre_lf} ${F.dot_lf}`,
     `LR ${F.tread_lr} ${F.pre_lr} ${F.dot_lr}`,
     `RR ${F.tread_rr} ${F.pre_rr} ${F.dot_rr}`,
+    '',
+    nowJST()
   ].join('\n');
   resHeader.textContent = `${F.plate_full}\n${F.model}`;
-  resLines.textContent = lines + `\n\n${nowJST().ts}`;
+  resLines.textContent = lines;
   form.style.display='none'; resultCard.style.display='block'; window.scrollTo({top:0,behavior:'smooth'});
 });
 
