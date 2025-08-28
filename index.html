@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>タイヤ点検アプリ（メモ順・v6）</title>
+<title>タイヤ点検アプリ（メモ順・v7）</title>
 <style>
   :root{ --pad:10px; --gap:8px; --radius:12px; --border:#e5e7eb; --bg:#fafafa; --brand:#2563eb; --muted:#667085;}
   *{ box-sizing:border-box; }
@@ -15,15 +15,22 @@
   .card{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:var(--pad); margin-bottom:var(--gap); }
   .title{ font-size:14px; font-weight:700; margin:0 0 6px; }
   label{ display:block; font-size:13px; color:#1f2937; margin:4px 0 4px; text-align:left; }
-  input[type="text"],input[type="number"],input[type="time"]{
+  input[type="text"]{
     width:100%; border:1px solid var(--border); border-radius:10px; padding:8px 10px;
     font-size:16px; background:#fff; text-align:left;
   }
   .veh-rows{ display:grid; gap:8px; }
   .veh-row2{ display:grid; grid-template-columns: minmax(120px,1fr) minmax(180px,2fr); gap:8px; }
   .std-row{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
-  .time-row{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
   .hint{ color:var(--muted); font-size:11px; }
+  /* シンプルな時間スタンプ領域 */
+  .time-stamp{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+  .stamp-card{ border:1px dashed var(--border); border-radius:10px; padding:8px; background:#fff; }
+  .stamp-head{ display:flex; align-items:center; justify-content:space-between; }
+  .stamp-title{ font-weight:700; font-size:13px; }
+  .stamp-btn{ appearance:none; border:1px solid var(--border); background:#fff; padding:6px 10px; border-radius:10px; font-size:13px; }
+  .stamp-time{ margin-top:6px; font-size:18px; font-weight:700; letter-spacing:0.5px; }
+  .muted{ color:var(--muted); font-size:12px; }
   .tire-list{ display:grid; gap:6px; }
   .tire-row{ display:grid; grid-template-columns: 1fr 1fr 1fr 46px; gap:6px; align-items:end; }
   .lab{ font-weight:700; text-align:right; color:#6b7280; padding-bottom:4px; }
@@ -31,7 +38,6 @@
   .inline{ display:grid; gap:2px; }
   .foot{ display:flex; gap:8px; flex-wrap:wrap; }
   .btn{ appearance:none; border:1px solid var(--border); background:#fff; padding:9px 12px; border-radius:12px; font-size:16px; }
-  .btn.small{ padding:6px 8px; font-size:13px; }
   .btn.primary{ background:var(--brand); color:#fff; border-color:var(--brand); }
   .section{ margin-top:6px; padding-top:6px; border-top:1px dashed var(--border); }
   .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space:pre-wrap; }
@@ -39,6 +45,7 @@
     .tire-row{ grid-template-columns: 1fr 1fr 1fr 40px; }
   }
   .focus-ring{ outline: 2px solid #2563eb; outline-offset: 2px; }
+  .ok-badge{ font-size:11px; color:#16a34a; margin-left:8px;}
 </style>
 </head>
 <body>
@@ -71,31 +78,32 @@
       <div class="std-row">
         <div>
           <label>規定圧（前）kPa <span class="hint">任意</span>
-            <input type="number" name="std_f" inputmode="numeric" placeholder="例: 260">
+            <input type="text" name="std_f" inputmode="numeric" placeholder="例: 260">
           </label>
         </div>
         <div>
           <label>規定圧（後）kPa <span class="hint">任意</span>
-            <input type="number" name="std_r" inputmode="numeric" placeholder="例: 260">
+            <input type="text" name="std_r" inputmode="numeric" placeholder="例: 260">
           </label>
         </div>
       </div>
-      <div class="time-row">
-        <div>
-          <label>解錠時刻（開錠）
-            <div class="inline">
-              <input type="time" name="unlock" id="unlock">
-              <button class="btn small" type="button" id="unlockNow">今</button>
-            </div>
-          </label>
+      <!-- シンプルな時間記録 -->
+      <div class="time-stamp">
+        <div class="stamp-card">
+          <div class="stamp-head">
+            <div class="stamp-title">解錠</div>
+            <button class="stamp-btn" type="button" id="unlockBtn">記録</button>
+          </div>
+          <div class="stamp-time" id="unlockTime">--:--</div>
+          <div class="muted" id="unlockNote"></div>
         </div>
-        <div>
-          <label>施錠時刻（施錠）
-            <div class="inline">
-              <input type="time" name="lock" id="lock">
-              <button class="btn small" type="button" id="lockNow">今</button>
-            </div>
-          </label>
+        <div class="stamp-card">
+          <div class="stamp-head">
+            <div class="stamp-title">施錠</div>
+            <button class="stamp-btn" type="button" id="lockBtn">記録</button>
+          </div>
+          <div class="stamp-time" id="lockTime">--:--</div>
+          <div class="muted" id="lockNote"></div>
         </div>
       </div>
     </div>
@@ -160,16 +168,31 @@ function nowHM(){
 }
 document.getElementById('now').textContent = nowJST();
 
-// QUICK TIME FILL
-document.getElementById('unlockNow').addEventListener('click', ()=>{
-  const el = document.getElementById('unlock');
-  el.value = nowHM();
-  document.getElementById('lock').focus();
+// シンプル記録：解錠/施錠
+const unlockBtn = document.getElementById('unlockBtn');
+const lockBtn = document.getElementById('lockBtn');
+const unlockTimeEl = document.getElementById('unlockTime');
+const lockTimeEl = document.getElementById('lockTime');
+const unlockNote = document.getElementById('unlockNote');
+const lockNote = document.getElementById('lockNote');
+
+function stamp(el, noteEl){
+  const t = nowHM();
+  const prev = el.textContent;
+  el.textContent = t;
+  if(prev && prev !== '--:--'){ noteEl.textContent = '更新: ' + t; }
+  else { noteEl.textContent = '記録しました'; }
+  setTimeout(()=> noteEl.textContent = '', 1500);
+}
+
+unlockBtn.addEventListener('click', ()=>{
+  stamp(unlockTimeEl, unlockNote);
+  // 次は施錠の記録ボタンへ
+  lockBtn.focus();
 });
-document.getElementById('lockNow').addEventListener('click', ()=>{
-  const el = document.getElementById('lock');
-  el.value = nowHM();
-  // スクロール無しで次（残溝RF）へ
+lockBtn.addEventListener('click', ()=>{
+  stamp(lockTimeEl, lockNote);
+  // 次は最初の残溝へ
   document.getElementById('tread_rf').focus();
 });
 
@@ -230,8 +253,8 @@ form.addEventListener('submit', () => {
   const plate = document.querySelector('[name="plate_full"]').value;
   const std_f = document.querySelector('[name="std_f"]').value;
   const std_r = document.querySelector('[name="std_r"]').value;
-  const unlock = document.getElementById('unlock').value || '--:--';
-  const lock = document.getElementById('lock').value || '--:--';
+  const unlock = unlockTimeEl.textContent || '--:--';
+  const lock = lockTimeEl.textContent || '--:--';
 
   const stdSuffix = (std_f && std_r) ? `    ${std_f}-${std_r}` : '';
   const lines = [
