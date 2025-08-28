@@ -1,11 +1,173 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>タイヤ点検アプリ</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>タイヤ点検アプリ（単画面版）</title>
+<style>
+  :root{ --pad:14px; --gap:12px; --radius:12px; --fg:#111; --muted:#667085; --border:#e5e7eb; --bg:#f7f7f9; --brand:#2563eb; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial; color:var(--fg); background:var(--bg); }
+  header{ position:sticky; top:0; z-index:10; background:#fff; padding:12px var(--pad); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px;}
+  header h1{ font-size:16px; margin:0; font-weight:700; }
+  .wrap{ padding:var(--pad); }
+  .card{ background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:var(--pad); margin-bottom:var(--gap); }
+  .title{ font-size:15px; font-weight:700; margin:0 0 6px;}
+  .muted{ color:var(--muted); font-size:13px; }
+  label{ display:block; font-size:13px; color:#374151; margin:8px 0 6px; }
+  input[type="text"],input[type="number"]{ width:100%; border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:16px; background:#fff; }
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .grid3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+  .row{ display:flex; gap:10px; }
+  .btn{ appearance:none; border:1px solid var(--border); background:#fff; padding:10px 14px; border-radius:12px; font-size:16px; }
+  .btn.primary{ background:var(--brand); color:#fff; border-color:var(--brand); }
+  .btn.ghost{ background:#fff; }
+  .foot{ display:flex; gap:10px; }
+  .result{ line-height:1.7; }
+  .badge{ display:inline-block; font-size:12px; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#1d4ed8; }
+  .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .section{ margin-top:6px; padding-top:6px; border-top:1px dashed var(--border); }
+  .ok{ color:#16a34a; } .warn{ color:#b45309; }
+</style>
 </head>
 <body>
-  <h1>タイヤ点検アプリ</h1>
-  <p>ここに点検フォームや結果表示を追加していきます。</p>
+<header>
+  <h1>タイヤ点検（単画面入力）</h1>
+  <span id="now" class="muted" style="margin-left:auto;"></span>
+</header>
+
+<div class="wrap">
+  <form id="form" class="card" onsubmit="return false;">
+    <p class="title">車両情報</p>
+    <div class="grid3">
+      <div><label>ステーション名<input type="text" name="station" autocomplete="off" required></label></div>
+      <div><label>車種（モデル）<input type="text" name="model" autocomplete="off" required></label></div>
+      <div><label>フルナンバー<input type="text" name="plate_full" autocomplete="off" required placeholder="例: 相模501ワ1234"></label></div>
+    </div>
+    <p class="title section">タイヤ別入力（右前→左前→左後→右後）</p>
+    <div class="grid2">
+      <div class="card">
+        <p class="title">右前（RF）</p>
+        <label>残溝 mm<input type="number" step="0.1" inputmode="decimal" name="tread_rf" required></label>
+        <label>空気圧（調整前）kPa<input type="number" step="1" inputmode="numeric" name="pre_rf" required></label>
+        <label>製造年週（4桁）<input type="text" pattern="\d{4}" maxlength="4" name="dot_rf" required placeholder="例: 2421"></label>
+      </div>
+      <div class="card">
+        <p class="title">左前（LF）</p>
+        <label>残溝 mm<input type="number" step="0.1" inputmode="decimal" name="tread_lf" required></label>
+        <label>空気圧（調整前）kPa<input type="number" step="1" inputmode="numeric" name="pre_lf" required></label>
+        <label>製造年週（4桁）<input type="text" pattern="\d{4}" maxlength="4" name="dot_lf" required></label>
+      </div>
+      <div class="card">
+        <p class="title">左後（LR）</p>
+        <label>残溝 mm<input type="number" step="0.1" inputmode="decimal" name="tread_lr" required></label>
+        <label>空気圧（調整前）kPa<input type="number" step="1" inputmode="numeric" name="pre_lr" required></label>
+        <label>製造年週（4桁）<input type="text" pattern="\d{4}" maxlength="4" name="dot_lr" required></label>
+      </div>
+      <div class="card">
+        <p class="title">右後（RR）</p>
+        <label>残溝 mm<input type="number" step="0.1" inputmode="decimal" name="tread_rr" required></label>
+        <label>空気圧（調整前）kPa<input type="number" step="1" inputmode="numeric" name="pre_rr" required></label>
+        <label>製造年週（4桁）<input type="text" pattern="\d{4}" maxlength="4" name="dot_rr" required></label>
+      </div>
+    </div>
+    <p class="muted">※規定圧は車種ごとに管理。今回は調整前のみ入力。</p>
+    <div class="foot">
+      <button class="btn" type="reset">クリア</button>
+      <button class="btn primary" id="submitBtn" type="submit">完了 → 結果表示</button>
+    </div>
+  </form>
+
+  <div id="resultCard" class="card" style="display:none;">
+    <p class="title">結果</p>
+    <p class="muted" id="meta"></p>
+    <div class="section result">
+      <div><span class="badge">残溝 (mm)</span></div>
+      <div class="mono" id="res_tread"></div>
+    </div>
+    <div class="section result">
+      <div><span class="badge">空気圧 調整前 (kPa)</span></div>
+      <div class="mono" id="res_pre"></div>
+    </div>
+    <div class="section result">
+      <div><span class="badge">製造年週（DOT 4桁）</span></div>
+      <div class="mono" id="res_dot"></div>
+    </div>
+    <div class="foot section">
+      <button class="btn ghost" id="backBtn">入力に戻る</button>
+      <button class="btn primary" id="copyBtn">表示をコピー</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// JSTで現在日時
+function nowJST(){
+  const jstOffset = 9 * 60; // minutes
+  const d = new Date();
+  const utc = d.getTime() + d.getTimezoneOffset()*60000;
+  const jst = new Date(utc + jstOffset*60000);
+  const mm = String(jst.getMonth()+1).padStart(2,'0');
+  const dd = String(jst.getDate()).padStart(2,'0');
+  const HH = String(jst.getHours()).padStart(2,'0');
+  const MM = String(jst.getMinutes()).padStart(2,'0');
+  return mm + '/' + dd + ' ' + HH + ':' + MM;
+}
+document.getElementById('now').textContent = nowJST();
+
+const form = document.getElementById('form');
+const resultCard = document.getElementById('resultCard');
+const meta = document.getElementById('meta');
+const resTread = document.getElementById('res_tread');
+const resPre = document.getElementById('res_pre');
+const resDot = document.getElementById('res_dot');
+const backBtn = document.getElementById('backBtn');
+const copyBtn = document.getElementById('copyBtn');
+
+form.addEventListener('submit', () => {
+  // 収集
+  const data = Object.fromEntries(new FormData(form).entries());
+  const order = ['rf','lf','lr','rr']; // 右前,左前,左後,右後
+
+  // 結果文字列
+  function line(prefix, key){
+    return `RF:${data[`${key}_rf`]}  /  LF:${data[`${key}_lf`]}  /  LR:${data[`${key}_lr`]}  /  RR:${data[`${key}_rr`]}`;
+  }
+
+  meta.textContent = `ステーション: ${data.station}　車種: ${data.model}　No: ${data.plate_full}　実施: ${nowJST()}`;
+  resTread.textContent = line('tread','tread');
+  resPre.textContent   = line('pre','pre');
+  resDot.textContent   = line('dot','dot');
+
+  form.style.display = 'none';
+  resultCard.style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+backBtn.addEventListener('click', () => {
+  resultCard.style.display = 'none';
+  form.style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+copyBtn.addEventListener('click', async () => {
+  const txt = [
+    meta.textContent,
+    '--- 残溝(mm) ---',
+    resTread.textContent,
+    '--- 空気圧 調整前(kPa) ---',
+    resPre.textContent,
+    '--- 製造年週(DOT) ---',
+    resDot.textContent,
+  ].join('\n');
+  try{
+    await navigator.clipboard.writeText(txt);
+    copyBtn.textContent = 'コピーしました';
+    setTimeout(()=> copyBtn.textContent = '表示をコピー', 1600);
+  }catch(e){
+    alert('コピーに失敗しました: ' + e);
+  }
+});
+</script>
 </body>
 </html>
