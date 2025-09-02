@@ -1,62 +1,62 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>タイヤ点検アプリ（本番・黒×オレンジ）</title>
-<style>
-  :root{ --pad:10px; --gap:8px; --radius:12px;
-         --border:#333; --bg:#000; --card:#1e1e1e;
-         --brand:#f97316; --muted:#aaa; --text:#fff; }
-  *{ box-sizing:border-box; }
-  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial;
-        background:var(--bg); color:var(--text); }
-  header{ position:sticky; top:0; background:#111; border-bottom:1px solid var(--border);
-          padding:8px var(--pad); display:flex; gap:8px; align-items:center; z-index:10; }
-  header h1{ margin:0; font-size:15px; font-weight:700; color:var(--text); }
-  #now{ margin-left:auto; color:var(--muted); font-size:12px; }
-  .wrap{ padding:var(--pad); }
-  .card{ background:var(--card); border:1px solid var(--border); border-radius:12px;
-         padding:var(--pad); margin-bottom:var(--gap); }
-  .title{ font-size:14px; font-weight:700; margin:0 0 6px; color:var(--text); }
-  label{ display:block; font-size:13px; margin:4px 0 4px; text-align:left; color:var(--text); }
-  input[type="text"]{ width:100%; border:1px solid var(--border); border-radius:10px; padding:8px 10px;
-                     font-size:16px; background:#000; color:var(--text); }
-  .veh-rows{ display:grid; gap:8px; }
-  .veh-row2{ display:grid; grid-template-columns: minmax(120px,1fr) minmax(180px,2fr); gap:8px; }
-  .std-row{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
-  .hint{ color:var(--muted); font-size:11px; }
-  .time-stamp{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
-  .stamp-card{ border:1px dashed var(--border); border-radius:10px; padding:8px; background:#111; }
-  .stamp-head{ display:flex; align-items:center; justify-content:space-between; }
-  .stamp-title{ font-weight:700; font-size:13px; color:var(--text); }
-  .stamp-btn{ appearance:none; border:1px solid var(--border); background:#222; color:var(--text);
-              padding:6px 10px; border-radius:10px; font-size:13px; }
-  .stamp-time{ margin-top:6px; font-size:18px; font-weight:700; letter-spacing:0.5px; color:var(--text); }
-  .muted{ color:var(--muted); font-size:12px; }
-  .tire-list{ display:grid; gap:6px; }
-  .tire-row{ display:grid; grid-template-columns: 1fr 1fr 1fr 46px; gap:6px; align-items:end; }
-  .lab{ font-weight:700; text-align:right; color:var(--muted); padding-bottom:4px; }
-  .cap{ font-size:11px; color:var(--muted); margin-bottom:2px; text-align:left; }
-  .inline{ display:grid; gap:2px; }
-  .foot{ display:flex; gap:8px; flex-wrap:wrap; }
-  .btn{ appearance:none; border:1px solid var(--border); background:#222; color:var(--text);
-        padding:9px 12px; border-radius:12px; font-size:16px; }
-  .btn.primary{ background:var(--brand); color:#fff; border-color:var(--brand); }
-  .section{ margin-top:6px; padding-top:6px; border-top:1px dashed var(--border); }
-  .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space:pre-wrap; color:var(--text); }
-  @media (max-width:380px){ .tire-row{ grid-template-columns: 1fr 1fr 1fr 40px; } }
-  .focus-ring{ outline: 2px solid var(--brand); outline-offset: 2px; }
-  .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:18px; background:#111; color:#fff;
-          border:1px solid var(--border); border-radius:10px; padding:10px 14px; font-size:13px; opacity:0;
-          transition:opacity .2s ease; pointer-events:none; }
-  .toast.show{ opacity:0.96; }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>タイヤ点検アプリ（本番・黒×オレンジ）</title>
+  <style>
+    :root{ --pad:10px; --gap:8px; --radius:12px;
+           --border:#333; --bg:#000; --card:#1e1e1e;
+           --brand:#f97316; --muted:#aaa; --text:#fff; }
+    *{ box-sizing:border-box; }
+    body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial;
+          background:var(--bg); color:var(--text); }
+    header{ position:sticky; top:0; background:#111; border-bottom:1px solid var(--border);
+            padding:8px var(--pad); display:flex; gap:8px; align-items:center; z-index:10; }
+    header h1{ margin:0; font-size:15px; font-weight:700; color:var(--text); }
+    #now{ margin-left:auto; color:var(--muted); font-size:12px; }
+    .wrap{ padding:var(--pad); }
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:12px;
+           padding:var(--pad); margin-bottom:var(--gap); }
+    .title{ font-size:14px; font-weight:700; margin:0 0 6px; color:var(--text); }
+    label{ display:block; font-size:13px; margin:4px 0 4px; text-align:left; color:var(--text); }
+    input[type="text"]{ width:100%; border:1px solid var(--border); border-radius:10px; padding:8px 10px;
+                       font-size:16px; background:#000; color:var(--text); }
+    .veh-rows{ display:grid; gap:8px; }
+    .veh-row2{ display:grid; grid-template-columns: minmax(120px,1fr) minmax(180px,2fr); gap:8px; }
+    .std-row{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+    .hint{ color:var(--muted); font-size:11px; }
+    .time-stamp{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+    .stamp-card{ border:1px dashed var(--border); border-radius:10px; padding:8px; background:#111; }
+    .stamp-head{ display:flex; align-items:center; justify-content:space-between; }
+    .stamp-title{ font-weight:700; font-size:13px; color:var(--text); }
+    .stamp-btn{ appearance:none; border:1px solid var(--border); background:#222; color:var(--text);
+                padding:6px 10px; border-radius:10px; font-size:13px; }
+    .stamp-time{ margin-top:6px; font-size:18px; font-weight:700; letter-spacing:0.5px; color:var(--text); }
+    .muted{ color:var(--muted); font-size:12px; }
+    .tire-list{ display:grid; gap:6px; }
+    .tire-row{ display:grid; grid-template-columns: 1fr 1fr 1fr 46px; gap:6px; align-items:end; }
+    .lab{ font-weight:700; text-align:right; color:var(--muted); padding-bottom:4px; }
+    .cap{ font-size:11px; color:var(--muted); margin-bottom:2px; text-align:left; }
+    .inline{ display:grid; gap:2px; }
+    .foot{ display:flex; gap:8px; flex-wrap:wrap; }
+    .btn{ appearance:none; border:1px solid var(--border); background:#222; color:var(--text);
+          padding:9px 12px; border-radius:12px; font-size:16px; }
+    .btn.primary{ background:var(--brand); color:#fff; border-color:var(--brand); }
+    .section{ margin-top:6px; padding-top:6px; border-top:1px dashed var(--border); }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space:pre-wrap; color:var(--text); }
+    @media (max-width:380px){ .tire-row{ grid-template-columns: 1fr 1fr 1fr 40px; } }
+    .focus-ring{ outline: 2px solid var(--brand); outline-offset: 2px; }
+    .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:18px; background:#111; color:#fff;
+            border:1px solid var(--border); border-radius:10px; padding:10px 14px; font-size:13px; opacity:0;
+            transition:opacity .2s ease; pointer-events:none; }
+    .toast.show{ opacity:0.96; }
+  </style>
 </head>
 <body>
 <header>
   <h1>タイヤ点検</h1>
-  <span id="now"></span>
+  <span id="now">--/-- --:--</span>
 </header>
 
 <div class="wrap">
@@ -124,8 +124,11 @@
 <div id="toast" class="toast">送信しました</div>
 
 <script>
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw_Lgz61Wc_M5ajTrKtUmR0xnm2BvRyx4b7XYVuTfM92sbaW3RSMwIyVCVEgWzi2mJp/exec';
+// Web App URL (unchanged)
+// Replace with your own Apps Script deployment URL
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby9RpFiUbYu6YX6JW9XfwbDx36_4AIlGEQMOxR3SnxgNdoRUJKfyxvF3b1SEYwuHb3X/exec';
 
+// Set current date/time in JST
 function nowJST(){
   const d=new Date();const utc=d.getTime()+d.getTimezoneOffset()*60000;const jst=new Date(utc+9*60*60000);
   const HH=String(jst.getHours()).padStart(2,'0');const MM=String(jst.getMinutes()).padStart(2,'0');
@@ -139,19 +142,30 @@ function nowHM(){
 }
 document.getElementById('now').textContent=nowJST();
 
-// 解錠/施錠ボタン
+// Prefill form fields from query parameters
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const station = params.get('station');
+  const model   = params.get('model');
+  const plate   = params.get('plate_full');
+  if (station) document.querySelector('[name="station"]').value = station;
+  if (model)   document.querySelector('[name="model"]').value   = model;
+  if (plate)   document.querySelector('[name="plate_full"]').value = plate;
+});
+
+// Time stamp buttons
 const unlockBtn=document.getElementById('unlockBtn'); const lockBtn=document.getElementById('lockBtn');
 const unlockTimeEl=document.getElementById('unlockTime'); const lockTimeEl=document.getElementById('lockTime');
 const unlockNote=document.getElementById('unlockNote'); const lockNote=document.getElementById('lockNote');
 function stamp(el,noteEl){
   const t=nowHM(),prev=el.textContent; el.textContent=t;
-  noteEl.textContent=(prev && prev!=="--:--")?("更新: "+t):"記録しました";
-  setTimeout(()=>noteEl.textContent="",1200);
+  noteEl.textContent=(prev && prev!=='--:--')?('更新: '+t):'記録しました';
+  setTimeout(()=>noteEl.textContent='',1200);
 }
 unlockBtn.addEventListener('click',()=>{ stamp(unlockTimeEl,unlockNote); lockBtn.focus(); });
 lockBtn.addEventListener('click',()=>{ stamp(lockTimeEl,lockNote); document.getElementById('tread_rf').focus(); });
 
-// 入力オートアドバンス
+// Auto-advance input fields
 const order=['tread_rf','pre_rf','dot_rf','tread_lf','pre_lf','dot_lf','tread_lr','pre_lr','dot_lr','tread_rr','pre_rr','dot_rr'];
 function focusNext(currId){
   const i=order.indexOf(currId);
@@ -169,31 +183,32 @@ function autoAdvancePressure(el){
 function autoAdvanceDOT(el){
   const v=el.value.replace(/[^0-9]/g,''); el.value=v.slice(0,4); if(el.value.length===4){ focusNext(el.id); }
 }
-;['rf','lf','lr','rr'].forEach(pos=>{
+['rf','lf','lr','rr'].forEach(pos=>{
   document.getElementById('tread_'+pos).addEventListener('input',e=>autoFormatTread(e.target));
   document.getElementById('pre_'+pos).addEventListener('input',e=>autoAdvancePressure(e.target));
   document.getElementById('dot_'+pos).addEventListener('input',e=>autoAdvanceDOT(e.target));
 });
 
-// 送信（no-corsでエラーを出さない）
+// Toast notifications
 function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1400); }
+
 async function postToSheet(payload){
-  fetch(WEB_APP_URL, { method:"POST", mode:"no-cors", body: JSON.stringify(payload) });
-  showToast("送信しました");
+  fetch(WEB_APP_URL, { method:'POST', mode:'no-cors', body: JSON.stringify(payload) });
+  showToast('送信しました');
 }
 
-// 結果表示 & 送信
+// Form submission
 const form=document.getElementById('form'); const resultCard=document.getElementById('resultCard');
 const resHeader=document.getElementById('res_header'); const resTimes=document.getElementById('res_times'); const resLines=document.getElementById('res_lines');
 function buildPayload(){
-  const gv = sel => document.querySelector(sel)?.value || "";
-  const g  = id  => document.getElementById(id)?.value || "";
+  const gv = sel => document.querySelector(sel)?.value || '';
+  const g  = id  => document.getElementById(id)?.value || '';
   return {
     station: gv('[name="station"]'),
-    model: gv('[name="model"]'),
+    model:   gv('[name="model"]'),
     plate_full: gv('[name="plate_full"]'),
-    unlock: unlockTimeEl.textContent || "",
-    lock:   lockTimeEl.textContent   || "",
+    unlock: unlockTimeEl.textContent || '',
+    lock:   lockTimeEl.textContent   || '',
     tread_rf: g('tread_rf'), pre_rf: g('pre_rf'), dot_rf: g('dot_rf'),
     tread_lf: g('tread_lf'), pre_lf: g('pre_lf'), dot_lf: g('dot_lf'),
     tread_lr: g('tread_lr'), pre_lr: g('pre_lr'), dot_lr: g('dot_lr'),
@@ -220,5 +235,6 @@ form.addEventListener('submit', async () => {
 });
 document.getElementById('backBtn').addEventListener('click',()=>{ resultCard.style.display='none'; form.style.display='block'; window.scrollTo({top:0,behavior:'smooth'}); });
 </script>
+
 </body>
 </html>
