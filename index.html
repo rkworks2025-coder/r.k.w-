@@ -52,29 +52,9 @@
             transition:opacity .2s ease; pointer-events:none; }
     .toast.show{ opacity:0.96; }
   
-/* === Results font enlargement (accessible) === */
-:root { --result-base: 20px; }
-#resultCard { font-size: var(--result-base); }
-#resultCard .mono { font-size: 1em; line-height: 1.6; }
-#resultCard .title { font-size: calc(var(--result-base) * 1.1); }
-@media (min-width:480px) { :root { --result-base: 22px; } }
-@media (min-width:768px) { :root { --result-base: 24px; } }
-
-
-/* === XXL override for result text === */
-:root { --result-base: 28px; }
-@media (min-width:480px) { :root { --result-base: 32px; } }
-@media (min-width:768px) { :root { --result-base: 36px; } }
-/* Optional: bump specific elements a bit more */
-#resultCard .title { font-size: 1.3em; }
-#resultCard .mono { font-size: 1.05em; line-height: 1.7; }
-
-
-/* === Times block: two-line layout & tighter spacing on small screens === */
+/* === Tighten spacing for times block & align mono spacing === */
 #res_times { line-height: 1.35; }
-@media (max-width: 390px) {
-  #res_times { line-height: 1.25; }
-}
+@media (max-width: 390px) { #res_times { line-height: 1.25; } }
 
 </style>
 </head>
@@ -244,15 +224,15 @@ function buildPayload(){
 form.addEventListener('submit', async () => {
   const p = buildPayload();
   const lines=[
-    `RF ${p.tread_rf} ${p.pre_rf} ${p.dot_rf}${(p.std_f&&p.std_r)?`    ${p.std_f}-${p.std_r}`:''}`,
-    `LF ${p.tread_lf} ${p.pre_lf} ${p.dot_lf}`,
-    `LR ${p.tread_lr} ${p.pre_lr} ${p.dot_lr}`,
-    `RR ${p.tread_rr} ${p.pre_rr} ${p.dot_rr}`,
+    `${p.tread_rf} ${p.pre_rf} ${p.dot_rf}${(p.std_f&&p.std_r)?`    ${p.std_f}-${p.std_r}`:''}   RF`,
+    `${p.tread_lf} ${p.pre_lf} ${p.dot_lf}   LF`,
+    `${p.tread_lr} ${p.pre_lr} ${p.dot_lr}   LR`,
+    `${p.tread_rr} ${p.pre_rr} ${p.dot_rr}   RR`,
     '',
     nowJST()
   ].join('\n');
   resHeader.textContent = `${p.plate_full}\n${p.model}`;
-  resTimes.textContent  = `解錠 ${p.unlock||'--:--'}    施錠 ${p.lock||'--:--'}`;
+  resTimes.innerHTML = `解錠　${p.unlock||'--:--'}<br>施錠　${p.lock||'--:--'}`;
   resLines.textContent  = lines;
   form.style.display='none'; resultCard.style.display='block'; window.scrollTo({top:0,behavior:'smooth'});
   await postToSheet(p);
