@@ -56,6 +56,17 @@
 #res_times { line-height: 1.35; }
 @media (max-width: 390px) { #res_times { line-height: 1.25; } }
 
+
+/* === Result font XL restore === */
+:root { --result-base: 32px; }
+@media (min-width:480px) { :root { --result-base: 36px; } }
+@media (min-width:768px) { :root { --result-base: 40px; } }
+/* Focus enlargement on result area */
+#resultCard { font-size: var(--result-base); }
+#res_header { font-size: 1.2em; }
+#res_times  { font-size: 1.1em; line-height: 1.35; }
+#res_lines  { font-size: 1.15em; line-height: 1.55; }
+
 </style>
 </head>
 <body>
