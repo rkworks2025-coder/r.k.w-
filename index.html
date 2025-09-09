@@ -67,6 +67,12 @@
 #res_times  { font-size: 1.1em; line-height: 1.35; }
 #res_lines  { font-size: 1.15em; line-height: 1.55; }
 
+
+/* === Result font ~70% size tweak === */
+:root { --result-base: 22px; }              /* ~70% of 32px */
+@media (min-width:480px)  { :root { --result-base: 25px; } }  /* ~70% of 36px */
+@media (min-width:768px)  { :root { --result-base: 28px; } }  /* ~70% of 40px */
+
 </style>
 </head>
 <body>
