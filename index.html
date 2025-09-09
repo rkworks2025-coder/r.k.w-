@@ -60,6 +60,15 @@
 @media (min-width:480px) { :root { --result-base: 22px; } }
 @media (min-width:768px) { :root { --result-base: 24px; } }
 
+
+/* === XXL override for result text === */
+:root { --result-base: 28px; }
+@media (min-width:480px) { :root { --result-base: 32px; } }
+@media (min-width:768px) { :root { --result-base: 36px; } }
+/* Optional: bump specific elements a bit more */
+#resultCard .title { font-size: 1.3em; }
+#resultCard .mono { font-size: 1.05em; line-height: 1.7; }
+
 </style>
 </head>
 <body>
