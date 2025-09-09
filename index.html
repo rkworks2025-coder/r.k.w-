@@ -52,12 +52,14 @@
             transition:opacity .2s ease; pointer-events:none; }
     .toast.show{ opacity:0.96; }
   
-/* --- Injected by v3: enlarge result screen font --- */
-#result, #result *, .result, .result *, .result-card, .result-card *,
-.res-lines, .res-lines *, #resultCard, #resultCard *,
-.mono { font-size: 18px !important; line-height: 1.6 !important; }
-/* badges a bit larger */
-.badge, .status-badge { font-size: 14px !important; }
+/* === Results font enlargement (accessible) === */
+:root { --result-base: 20px; }
+#resultCard { font-size: var(--result-base); }
+#resultCard .mono { font-size: 1em; line-height: 1.6; }
+#resultCard .title { font-size: calc(var(--result-base) * 1.1); }
+@media (min-width:480px) { :root { --result-base: 22px; } }
+@media (min-width:768px) { :root { --result-base: 24px; } }
+
 </style>
 </head>
 <body>
