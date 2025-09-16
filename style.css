@@ -1,0 +1,74 @@
+
+    :root{ --pad:10px; --gap:8px; --radius:12px;
+           --border:#333; --bg:#000; --card:#1e1e1e;
+           --brand:#f97316; --muted:#aaa; --text:#fff; }
+    *{ box-sizing:border-box; }
+    body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial;
+          background:var(--bg); color:var(--text); }
+    header{ position:sticky; top:0; background:#111; border-bottom:1px solid var(--border);
+            padding:8px var(--pad); display:flex; gap:8px; align-items:center; z-index:10; }
+    header h1{ margin:0; font-size:15px; font-weight:700; color:var(--text); }
+    #now{ margin-left:auto; color:var(--muted); font-size:12px; }
+    .wrap{ padding:var(--pad); }
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:12px;
+           padding:var(--pad); margin-bottom:var(--gap); }
+    .title{ font-size:14px; font-weight:700; margin:0 0 6px; color:var(--text); }
+    label{ display:block; font-size:13px; margin:4px 0 4px; text-align:left; color:var(--text); }
+    input[type="text"]{ width:100%; border:1px solid var(--border); border-radius:10px; padding:8px 10px;
+                       font-size:16px; background:#000; color:var(--text); }
+    .veh-rows{ display:grid; gap:8px; }
+    .veh-row2{ display:grid; grid-template-columns: minmax(120px,1fr) minmax(180px,2fr); gap:8px; }
+    .std-row{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+    .hint{ color:var(--muted); font-size:11px; }
+    .time-stamp{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+    .stamp-card{ border:1px dashed var(--border); border-radius:10px; padding:8px; background:#111; }
+    .stamp-head{ display:flex; align-items:center; justify-content:space-between; }
+    .stamp-title{ font-weight:700; font-size:13px; color:var(--text); }
+    .stamp-btn{ appearance:none; border:1px solid var(--border); background:#222; color:var(--text);
+                padding:6px 10px; border-radius:10px; font-size:13px; }
+    .stamp-time{ margin-top:6px; font-size:18px; font-weight:700; letter-spacing:0.5px; color:var(--text); }
+    .muted{ color:var(--muted); font-size:12px; }
+    .tire-list{ display:grid; gap:6px; }
+    .tire-row{ display:grid; grid-template-columns: 1fr 1fr 1fr 46px; gap:6px; align-items:end; }
+    .lab{ font-weight:700; text-align:right; color:var(--muted); padding-bottom:4px; }
+    .cap{ font-size:11px; color:var(--muted); margin-bottom:2px; text-align:left; }
+    .inline{ display:grid; gap:2px; }
+    .foot{ display:flex; gap:8px; flex-wrap:wrap; }
+    .btn{ appearance:none; border:1px solid var(--border); background:#222; color:var(--text);
+          padding:9px 12px; border-radius:12px; font-size:16px; }
+    .btn.primary{ background:var(--brand); color:#fff; border-color:var(--brand); }
+    .section{ margin-top:6px; padding-top:6px; border-top:1px dashed var(--border); }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space:pre-wrap; color:var(--text); }
+    @media (max-width:380px){ .tire-row{ grid-template-columns: 1fr 1fr 1fr 40px; } }
+    .focus-ring{ outline: 2px solid var(--brand); outline-offset: 2px; }
+    .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:18px; background:#111; color:#fff;
+            border:1px solid var(--border); border-radius:10px; padding:10px 14px; font-size:13px; opacity:0;
+            transition:opacity .2s ease; pointer-events:none; }
+    .toast.show{ opacity:0.96; }
+  
+/* === Tighten spacing for times block & align mono spacing === */
+#res_times { line-height: 1.35; }
+@media (max-width: 390px) { #res_times { line-height: 1.25; } }
+
+
+/* === Result font XL restore === */
+:root { --result-base: 32px; }
+@media (min-width:480px) { :root { --result-base: 36px; } }
+@media (min-width:768px) { :root { --result-base: 40px; } }
+/* Focus enlargement on result area */
+#resultCard { font-size: var(--result-base); }
+#res_header { font-size: 1.2em; }
+#res_times  { font-size: 1.1em; line-height: 1.35; }
+#res_lines  { font-size: 1.15em; line-height: 1.55; }
+
+
+/* === Result font ~70% size tweak === */
+:root { --result-base: 22px; }              /* ~70% of 32px */
+@media (min-width:480px)  { :root { --result-base: 25px; } }  /* ~70% of 36px */
+@media (min-width:768px)  { :root { --result-base: 28px; } }  /* ~70% of 40px */
+
+
+/* version badge */
+.ver-badge{position:fixed;top:8px;right:12px;padding:2px 6px;font-size:12px;
+border:1px solid #333;border-radius:999px;color:#bbb;background:rgba(0,0,0,.35);
+backdrop-filter:saturate(120%) blur(2px);z-index:9999}
