@@ -415,3 +415,147 @@ document.getElementById('backBtn')?.addEventListener('click',()=>{
 
 })(); 
 // === end reload-restore module ===
+
+// ===== v5e: URL-forced identifiers + per-tab draft (sessionStorage) =====
+(function(){
+  var DKEY = 'tireapp_draft_v1';
+  var SELS = {
+    station: '#station, [name="station"]',
+    model:   '#model, [name="model"]',
+    plate:   '#plateFull, #fullNumber, #plate, [name="plate_full"], [name="plate"]',
+  };
+
+  function qs(sel){ return document.querySelector(sel); }
+  function getVal(sel){
+    var el = qs(sel); if (!el) return '';
+    if ('value' in el) return el.value;
+    return el.textContent || '';
+  }
+  function setVal(sel, v){
+    var el = qs(sel); if (!el) return false;
+    if ('value' in el){ el.value = v; try{ el.dispatchEvent(new Event('input', {bubbles:true})); }catch(e){}; return true; }
+    el.textContent = v; return true;
+  }
+
+  function applyUrlIds(){
+    var p = new URLSearchParams(location.search);
+    var st = p.get('station') || '';
+    var md = p.get('model')   || p.get('car_model') || '';
+    var pf = p.get('plate_full') || p.get('plateFull') || p.get('full_plate') || p.get('plate') || p.get('p') || '';
+    if (st) setVal(SELS.station, st);
+    if (md) setVal(SELS.model,   md);
+    if (pf) setVal(SELS.plate,   pf);
+  }
+
+  function anchor(){
+    return {
+      station: getVal(SELS.station),
+      plate_full: getVal(SELS.plate)
+    };
+  }
+  function sameAnchor(a,b){ return !!a && !!b && a.station===b.station && a.plate_full===b.plate_full; }
+
+  function collectDraft(){
+    var data = { ts: Date.now(), a: anchor(), fields:{} };
+    var nodes = document.querySelectorAll('input, textarea, select');
+    nodes.forEach(function(el){
+      var id = el.id || el.name; if (!id) return;
+      var idLower = id.toLowerCase();
+      if (idLower.includes('station') || idLower.includes('plate') || idLower.includes('model')) return;
+      if (el.type === 'checkbox' || el.type === 'radio'){
+        data.fields[id] = el.checked ? '__checked__' : '__unchecked__';
+      }else{
+        data.fields[id] = el.value;
+      }
+    });
+    var unlock = document.querySelector('#unlockTime, [data-role="unlockTime"]');
+    var lock   = document.querySelector('#lockTime, [data-role="lockTime"]');
+    if (unlock) data.fields.__unlockText = unlock.textContent || '';
+    if (lock)   data.fields.__lockText   = lock.textContent   || '';
+    return data;
+  }
+
+  function applyDraft(d){
+    if (!d || !d.fields) return;
+    Object.keys(d.fields).forEach(function(k){
+      if (k === '__unlockText'){
+        var u = document.querySelector('#unlockTime, [data-role="unlockTime"]');
+        if (u) u.textContent = d.fields[k] || '';
+        return;
+      }
+      if (k === '__lockText'){
+        var l = document.querySelector('#lockTime, [data-role="lockTime"]');
+        if (l) l.textContent = d.fields[k] || '';
+        return;
+      }
+      var el = document.getElementById(k) || document.querySelector('[name="'+CSS.escape(k)+'"]');
+      if (!el) return;
+      if (el.type === 'checkbox' || el.type === 'radio'){
+        el.checked = (d.fields[k] === '__checked__');
+      }else{
+        el.value = d.fields[k];
+      }
+      try{ el.dispatchEvent(new Event('input', {bubbles:true})); }catch(e){}
+    });
+  }
+
+  function loadDraft(){
+    try{
+      var raw = sessionStorage.getItem(DKEY);
+      if (!raw) return;
+      var d = JSON.parse(raw);
+      if (!d || !d.a) return;
+      if (!sameAnchor(d.a, anchor())){
+        sessionStorage.removeItem(DKEY);
+        return;
+      }
+      if (Date.now() - (d.ts||0) > 24*60*60*1000){
+        sessionStorage.removeItem(DKEY);
+        return;
+      }
+      applyDraft(d);
+    }catch(e){}
+  }
+
+  function saveDraft(){
+    try{
+      var d = collectDraft();
+      if (!d.a.station || !d.a.plate_full) return;
+      sessionStorage.setItem(DKEY, JSON.stringify(d));
+    }catch(e){}
+  }
+
+  function purgeDraft(){
+    try{ sessionStorage.removeItem(DKEY); }catch(e){}
+  }
+
+  function wire(){
+    document.addEventListener('input', function(){ saveDraft(); }, {passive:true});
+    document.addEventListener('change', function(){ saveDraft(); }, {passive:true});
+    window.addEventListener('pagehide', function(){ saveDraft(); });
+    document.addEventListener('visibilitychange', function(){ if (document.visibilityState==='hidden') saveDraft(); });
+    document.addEventListener('click', function(ev){
+      var t = ev.target;
+      if (!t) return;
+      var txt = (t.textContent||'').trim();
+      if (t.id && t.id.toLowerCase().includes('complete')) { purgeDraft(); }
+      else if (t.dataset && (t.dataset.role==='complete' || t.dataset.action==='complete')) { purgeDraft(); }
+      else if (txt === '完了' || txt === '結果表示' || txt.includes('完了')) { purgeDraft(); }
+    }, true);
+  }
+
+  function init(){
+    applyUrlIds();
+    loadDraft();
+    wire();
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init, {once:true});
+  }else{
+    init();
+  }
+  window.addEventListener('pageshow', function(ev){ if (ev.persisted){ init(); } });
+})();
+// ===== end v5e inject =====
+
