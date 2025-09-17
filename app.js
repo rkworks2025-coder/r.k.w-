@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const usp = new URLSearchParams(location.search);
   const station = usp.get('station') || usp.get('s') || '';
   const model   = usp.get('model')   || usp.get('m') || '';
-  const plate   = usp.get('plate')   || usp.get('p') || '';
+  const plate = usp.get('plate_full') || usp.get('plate') || usp.get('p') || '';
   if (station) document.querySelector('[name="station"]').value = station;
   if (model)   document.querySelector('[name="model"]').value   = model;
   if (plate)   document.querySelector('[name="plate_full"]').value = plate;
