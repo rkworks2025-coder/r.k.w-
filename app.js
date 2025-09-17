@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const usp = new URLSearchParams(location.search);
   const station = usp.get('station') || usp.get('s') || '';
   const model   = usp.get('model')   || usp.get('m') || '';
-  const plate   = usp.get('plate')   || usp.get('p') || usp.get('plate_full') || '';
+  const plate   = usp.get('plate')   || usp.get('p') || '';
   if (station) document.querySelector('[name="station"]').value = station;
   if (model)   document.querySelector('[name="model"]').value   = model;
   if (plate)   document.querySelector('[name="plate_full"]').value = plate;
@@ -119,7 +119,7 @@ if (form) form.addEventListener('submit', async (ev)=>{
   ev.preventDefault();
   const p = buildPayload();
   const lines = [
-    `${p.tread_rf} ${p.pre_rf} ${p.dot_rf}${(p.std_f&&p.std_r)?`    ${p.std_f}-${p.std_r}`:''}   RF`,
+    `${p.tread_rf} ${p.pre_rf} ${p.dot_rf}   RF`,
     `${p.tread_lf} ${p.pre_lf} ${p.dot_lf}   LF`,
     `${p.tread_lr} ${p.pre_lr} ${p.dot_lr}   LR`,
     `${p.tread_rr} ${p.pre_rr} ${p.dot_rr}   RR`,
@@ -129,7 +129,7 @@ if (form) form.addEventListener('submit', async (ev)=>{
 
   // 結果画面更新（stationも先頭に）
   resHeader.textContent = (p.station? (p.station+'\n') : '') + p.plate_full + '\n' + p.model;
-  resTimes.innerHTML = `解錠　${p.unlock||'--:--'}<br>施錠　${p.lock||'--:--'}`;
+  resTimes.innerHTML = `解錠　${p.unlock||'--:--'}<br>施錠　${p.lock||'--:--'}` + ((p.std_f && p.std_r) ? `<br>${p.std_f}-${p.std_r}` : '');
   resLines.textContent = lines;
 
   form.style.display = 'none';
@@ -224,3 +224,194 @@ document.getElementById('backBtn')?.addEventListener('click',()=>{
 })();
 // --- end reload recovery module ---
 
+
+// === tireapp reload-restore module (v3t-equivalent, isolated, enhanced time restore) ===
+(function(){
+  if (window.__tireAppReloadRestoreLoaded) return;
+  window.__tireAppReloadRestoreLoaded = true;
+
+  const TTL_MS = 24*60*60*1000; // 24h
+  const NS = 'tireapp';
+  const LAST_KEY = NS + ':lastKey'; // sessionStorage per-tab
+  const TIME_IDS = ['unlockTime','lockTime'];
+
+  function dq(sel){ return document.querySelector(sel); }
+  function now(){ return Date.now(); }
+  function enc(s){ return encodeURIComponent(s || ''); }
+  function keyFor(st, pl){ return `${NS}:${enc(st)}|${enc(pl)}`; }
+
+  function valOf(selector){
+    const el = document.querySelector(selector);
+    if (!el) return '';
+    return (el.value || '').trim();
+  }
+  function getStation(){ return valOf('[name="station"],#station'); }
+  function getPlate(){ return valOf('[name="plate_full"],#plate_full'); }
+
+  function currentKey(){
+    const st = getStation();
+    const pl = getPlate();
+    if (!st || !pl) return null;
+    return keyFor(st, pl);
+  }
+
+  function snapshotForm(){
+    const data = {};
+    document.querySelectorAll('input, textarea, select').forEach(el=>{
+      const id = el.id || el.name;
+      if(!id) return;
+      const v = (el.type === 'checkbox' || el.type === 'radio') ? !!el.checked : el.value;
+      data[id] = v;
+    });
+    // capture display-only time texts (unlockTime, lockTime)
+    TIME_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if(el) data[id] = (el.textContent || '').trim();
+    });
+    return { t: now(), data };
+  }
+
+  function saveDraft(){
+    const k = currentKey();
+    if (!k) return;
+    try{
+      const snap = snapshotForm();
+      localStorage.setItem(k, JSON.stringify(snap));
+      sessionStorage.setItem(LAST_KEY, k);
+    }catch(e){ /* ignore quota/private mode */ }
+  }
+
+  function expired(ts){ return (now() - ts) > TTL_MS; }
+
+  function applySnapshot(obj){
+    if (!obj || !obj.data) return false;
+    let applied = false;
+    for (const k in obj.data){
+      const selector = '#' + CSS.escape(k) + ', [name="'+k+'"]';
+      const el = document.querySelector(selector);
+      if (!el) continue;
+      if (el.type === 'checkbox' || el.type === 'radio'){
+        el.checked = !!obj.data[k];
+      }else if ('value' in el){
+        const prev = el.value;
+        el.value = obj.data[k];
+        if (k !== 'station' && k !== 'plate_full' && prev !== el.value){
+          try{ el.dispatchEvent(new Event('input', {bubbles:true})); }catch(_){}
+          try{ el.dispatchEvent(new Event('change', {bubbles:true})); }catch(_){}
+        }
+      }
+      applied = true;
+    }
+    // restore display-only time texts if present (first pass)
+    try{
+      TIME_IDS.forEach(id =>{
+        if(obj.data && obj.data[id] && String(obj.data[id]).length){
+          const el = document.getElementById(id);
+          if(el) el.textContent = obj.data[id];
+        }
+      });
+    }catch(e){}
+    // schedule second pass after potential initializers run
+    setTimeout(()=>{
+      try{
+        TIME_IDS.forEach(id =>{
+          if(obj.data && obj.data[id] && String(obj.data[id]).length){
+            const el = document.getElementById(id);
+            if(el && (!el.textContent || !el.textContent.trim())) el.textContent = obj.data[id];
+          }
+        });
+      }catch(e){}
+    }, 60);
+    return applied;
+  }
+
+  function readDraftByKey(k){
+    try{
+      const raw = localStorage.getItem(k);
+      if (!raw) return null;
+      const obj = JSON.parse(raw);
+      if (!obj || !obj.t || expired(obj.t)) return null;
+      return obj;
+    }catch(e){ return null; }
+  }
+
+  function tryRestoreByKey(k){
+    const obj = readDraftByKey(k);
+    if (!obj) return false;
+    return applySnapshot(obj);
+  }
+
+  function isReloadNav(){
+    try{
+      const navs = performance.getEntriesByType && performance.getEntriesByType('navigation');
+      if (navs && navs[0] && navs[0].type) return navs[0].type === 'reload';
+    }catch(e){}
+    try{
+      if (performance && performance.navigation) return performance.navigation.type === 1;
+    }catch(e){}
+    return false;
+  }
+
+  function restoreOnReload(){
+    if (!isReloadNav()) return;
+    const last = sessionStorage.getItem(LAST_KEY);
+    if (!last) return;
+    tryRestoreByKey(last);
+    // extra pass on load to win against late initializers
+    window.addEventListener('load', ()=>{
+      const obj = readDraftByKey(last);
+      if (obj) applySnapshot(obj);
+    }, {once:true});
+  }
+
+  function restoreWhenKeyReady(){
+    const k = currentKey();
+    if (!k) return;
+    tryRestoreByKey(k);
+  }
+
+  // watch time labels; when they change, save draft
+  function observeTimeLabels(){
+    TIME_IDS.forEach(id=>{
+      const el = document.getElementById(id);
+      if(!el) return;
+      try{
+        const mo = new MutationObserver(()=> saveDraft());
+        mo.observe(el, {characterData:true, childList:true, subtree:true});
+      }catch(e){}
+    });
+  }
+
+  // attach lightweight listeners for save
+  (function attach(){
+    document.querySelectorAll('input, textarea, select').forEach(el=>{
+      el.addEventListener('input', saveDraft, {passive:true});
+      el.addEventListener('change', saveDraft, {passive:true});
+    });
+    window.addEventListener('pagehide', saveDraft, {passive:true});
+    document.addEventListener('visibilitychange', ()=>{
+      if (document.visibilityState === 'hidden') saveDraft();
+    }, {passive:true});
+  })();
+
+  // bootstrap
+  document.addEventListener('DOMContentLoaded', ()=>{
+    observeTimeLabels();
+    restoreOnReload();
+    restoreWhenKeyReady();
+    // one more microtask/frame to ensure times persist
+    requestAnimationFrame(()=>{
+      restoreWhenKeyReady();
+    });
+  }, {once:true});
+
+  // react to key fields becoming available
+  const stEl = dq('[name="station"],#station');
+  const plEl = dq('[name="plate_full"],#plate_full');
+  stEl && stEl.addEventListener('input', restoreWhenKeyReady, {passive:true});
+  plEl && plEl.addEventListener('input', restoreWhenKeyReady, {passive:true});
+  stEl && stEl.addEventListener('change', restoreWhenKeyReady, {passive:true});
+  plEl && plEl.addEventListener('change', restoreWhenKeyReady, {passive:true});
+
+})(); 
+// === end reload-restore module ===
