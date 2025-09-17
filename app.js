@@ -1,5 +1,5 @@
 
-// v5c — FIX: restore core behaviors + simple GAS logging (form-encoded)
+// v4c — FIX: restore core behaviors + simple GAS logging (form-encoded)
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyo2U1_TBxvzhJL50GHY8S0NeT1k0kueWb4tI1q2Oaw87NuGXqwjO7PWyCDdqFNZTdz/exec';
 const SHEETS_KEY = 'tl1';
 
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const usp = new URLSearchParams(location.search);
   const station = usp.get('station') || usp.get('s') || '';
   const model   = usp.get('model')   || usp.get('m') || '';
-  const plate = usp.get('plate_full') || usp.get('plate') || usp.get('p') || '';
+  const plate   = usp.get('plate')   || usp.get('p') || '';
   if (station) document.querySelector('[name="station"]').value = station;
   if (model)   document.querySelector('[name="model"]').value   = model;
   if (plate)   document.querySelector('[name="plate_full"]').value = plate;
@@ -118,17 +118,14 @@ function buildPayload(){
 if (form) form.addEventListener('submit', async (ev)=>{
   ev.preventDefault();
   const p = buildPayload();
-  const stdLine = (p.std_f && p.std_r) ? `${p.std_f}-${p.std_r}` : '';
   const lines = [
-    stdLine,
-    `${p.tread_rf} ${p.pre_rf} ${p.dot_rf}   RF`,
+    `${p.tread_rf} ${p.pre_rf} ${p.dot_rf}${(p.std_f&&p.std_r)?`    ${p.std_f}-${p.std_r}`:''}   RF`,
     `${p.tread_lf} ${p.pre_lf} ${p.dot_lf}   LF`,
     `${p.tread_lr} ${p.pre_lr} ${p.dot_lr}   LR`,
     `${p.tread_rr} ${p.pre_rr} ${p.dot_rr}   RR`,
     '',
     nowJST()
-  ].filter(Boolean).join('
-');
+  ].join('\n');
 
   // 結果画面更新（stationも先頭に）
   resHeader.textContent = (p.station? (p.station+'\n') : '') + p.plate_full + '\n' + p.model;
@@ -228,7 +225,7 @@ document.getElementById('backBtn')?.addEventListener('click',()=>{
 // --- end reload recovery module ---
 
 
-// === tireapp reload-restore module (v5c-equivalent, isolated, enhanced time restore) ===
+// === tireapp reload-restore module (v3t-equivalent, isolated, enhanced time restore) ===
 (function(){
   if (window.__tireAppReloadRestoreLoaded) return;
   window.__tireAppReloadRestoreLoaded = true;
