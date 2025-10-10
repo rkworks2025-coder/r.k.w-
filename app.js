@@ -31,7 +31,7 @@
     const pf = gv('[name="plate_full"]');
     const md = gv('[name="model"]');
     // include version to avoid cross-version storage collisions
-    return `v7f:${encodeURIComponent(st)}|${encodeURIComponent(pf)}|${encodeURIComponent(md)}`;
+    return `v7g:${encodeURIComponent(st)}|${encodeURIComponent(pf)}|${encodeURIComponent(md)}`;
   }
 
   // ===== 解錠/施錠 時刻 永続化（車両単位） =====
