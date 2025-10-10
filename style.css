@@ -31,7 +31,10 @@
     .tire-list{ display:grid; gap:6px; }
     .tire-row{ display:grid; grid-template-columns: 1fr 1fr 1fr 46px; gap:6px; align-items:end; }
     .lab{ font-weight:700; text-align:right; color:var(--muted); padding-bottom:4px; }
-    .cap{ font-size:11px; color:var(--muted); margin-bottom:2px; text-align:left; }
+.cap{ font-size:11px; color:var(--muted); margin-bottom:2px; text-align:left; }
+/* allow previous value display to the right of label */
+.cap{ display:flex; justify-content:space-between; align-items:center; gap:4px; }
+.cap .prev-val{ color:var(--brand); font-size:11px; white-space:nowrap; margin-left:auto; }
     .inline{ display:grid; gap:2px; }
     .foot{ display:flex; gap:8px; flex-wrap:wrap; }
     .btn{ appearance:none; border:1px solid var(--border); background:#222; color:var(--text);

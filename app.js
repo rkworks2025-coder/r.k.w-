@@ -1,5 +1,5 @@
 
-// v4c — FIX: restore core behaviors + simple GAS logging (form-encoded)
+// v5f — base from v4c with enhancements: persist stamp times and fetch presets/previous values from GAS
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyo2U1_TBxvzhJL50GHY8S0NeT1k0kueWb4tI1q2Oaw87NuGXqwjO7PWyCDdqFNZTdz/exec';
 const SHEETS_KEY = 'tl1';
 
@@ -558,4 +558,113 @@ document.getElementById('backBtn')?.addEventListener('click',()=>{
   window.addEventListener('pageshow', function(ev){ if (ev.persisted){ init(); } });
 })();
 // ===== end v5e inject =====
+
+// === v5f enhancements: persist unlock/lock times and fetch data from Google Sheets ===
+(() => {
+  // keys used for localStorage to persist unlock/lock times across reloads
+  const UNLOCK_KEY = 'v5f_unlockTime';
+  const LOCK_KEY   = 'v5f_lockTime';
+
+  // on load, restore times if present
+  document.addEventListener('DOMContentLoaded', () => {
+    try {
+      const ut = localStorage.getItem(UNLOCK_KEY);
+      if (ut && unlockTimeEl) unlockTimeEl.textContent = ut;
+      const lt = localStorage.getItem(LOCK_KEY);
+      if (lt && lockTimeEl)   lockTimeEl.textContent   = lt;
+    } catch (e) {}
+  }, { once: true });
+
+  // helper to persist current times
+  function persistTimes() {
+    try {
+      if (unlockTimeEl) localStorage.setItem(UNLOCK_KEY, unlockTimeEl.textContent || '');
+      if (lockTimeEl)   localStorage.setItem(LOCK_KEY,   lockTimeEl.textContent   || '');
+    } catch (e) {}
+  }
+
+  // attach persistence to stamp actions
+  if (unlockBtn) unlockBtn.addEventListener('click', () => { persistTimes(); });
+  if (lockBtn)   lockBtn.addEventListener('click',   () => { persistTimes(); });
+
+  // debounced fetch timer
+  let fetchTimer;
+
+  // fetch predetermined pressures and previous values from GAS
+  async function fetchSheetData() {
+    // gather primary identifiers
+    const station = gv('[name="station"]');
+    const model   = gv('[name="model"]');
+    const plate   = gv('[name="plate_full"]');
+    // require at least one identifier
+    if (!(station || model || plate)) return;
+    try {
+      const url = new URL(SHEETS_URL);
+      if (SHEETS_KEY) url.searchParams.set('key', SHEETS_KEY);
+      if (station) url.searchParams.set('station', station);
+      if (model)   url.searchParams.set('model', model);
+      if (plate)   url.searchParams.set('plate', plate);
+      // explicit mode hint for GAS; gracefully ignored if unsupported
+      url.searchParams.set('mode', 'fetch');
+      const res = await fetch(url.toString());
+      if (!res || !res.ok) return;
+      let data;
+      try { data = await res.json(); } catch (e) { data = null; }
+      if (!data || typeof data !== 'object') return;
+      // populate standard pressures only if fields are empty
+      if (data.std_f) {
+        const el = document.querySelector('[name="std_f"]');
+        if (el && !el.value) el.value = data.std_f;
+      }
+      if (data.std_r) {
+        const el = document.querySelector('[name="std_r"]');
+        if (el && !el.value) el.value = data.std_r;
+      }
+      // populate previous values for individual tires
+      if (data.prev && typeof data.prev === 'object') {
+        Object.keys(data.prev).forEach(key => {
+          const val = data.prev[key];
+          if (!val) return;
+          const parts = key.split('_');
+          if (parts.length !== 2) return;
+          const field = parts[0];
+          const pos   = parts[1];
+          const inputId = `${field}_${pos}`;
+          const inlineEl = document.getElementById(inputId)?.closest('.inline');
+          if (!inlineEl) return;
+          const capEl = inlineEl.querySelector('.cap');
+          if (!capEl) return;
+          // create or update the span for previous value
+          let span = capEl.querySelector('.prev-val');
+          if (!span) {
+            span = document.createElement('span');
+            span.className = 'prev-val';
+            capEl.appendChild(span);
+          }
+          span.textContent = `(前回 ${val})`;
+        });
+      }
+    } catch (e) {
+      // ignore network or parsing errors silently
+    }
+  }
+
+  // debounce wrapper to avoid excessive requests
+  function debounceFetch() {
+    clearTimeout(fetchTimer);
+    fetchTimer = setTimeout(fetchSheetData, 350);
+  }
+
+  // attach listeners to fetch data when key fields change
+  document.addEventListener('DOMContentLoaded', () => {
+    ['station', 'model', 'plate_full'].forEach(name => {
+      document.querySelectorAll(`[name="${name}"]`).forEach(el => {
+        el.addEventListener('change', debounceFetch, { passive: true });
+        el.addEventListener('input',  debounceFetch, { passive: true });
+      });
+    });
+    // perform initial fetch in case URL params prefill fields
+    debounceFetch();
+  }, { once: true });
+})();
 
