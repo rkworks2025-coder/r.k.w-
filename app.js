@@ -1,5 +1,5 @@
 
-// v5f — base from v4c with enhancements: persist stamp times and fetch presets/previous values from GAS
+// V7a — enhanced: persist stamp times, robust GAS send/receive, and fallback previous-value display
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyo2U1_TBxvzhJL50GHY8S0NeT1k0kueWb4tI1q2Oaw87NuGXqwjO7PWyCDdqFNZTdz/exec';
 const SHEETS_KEY = 'tl1';
 
@@ -591,6 +591,40 @@ document.getElementById('backBtn')?.addEventListener('click',()=>{
   // debounced fetch timer
   let fetchTimer;
 
+  // list of field IDs to show previous values for
+  const FIELD_IDS = [
+    'tread_rf','pre_rf','dot_rf',
+    'tread_lf','pre_lf','dot_lf',
+    'tread_lr','pre_lr','dot_lr',
+    'tread_rr','pre_rr','dot_rr'
+  ];
+
+  // helper to update previous value display for all fields; uses fallback when value is missing
+  function updatePrevFields(prevData) {
+    FIELD_IDS.forEach(key => {
+      const parts = key.split('_');
+      const prefix = parts[0];
+      let fallback;
+      if (prefix === 'tread') fallback = '-.-';
+      else if (prefix === 'pre') fallback = '---';
+      else fallback = '----';
+      const val = (prevData && prevData[key] != null && String(prevData[key]).trim() !== '') ? prevData[key] : fallback;
+      const inputEl = document.getElementById(key);
+      if (!inputEl) return;
+      const inlineEl = inputEl.closest('.inline');
+      if (!inlineEl) return;
+      const capEl = inlineEl.querySelector('.cap');
+      if (!capEl) return;
+      let span = capEl.querySelector('.prev-val');
+      if (!span) {
+        span = document.createElement('span');
+        span.className = 'prev-val';
+        capEl.appendChild(span);
+      }
+      span.textContent = `(前回 ${val})`;
+    });
+  }
+
   // fetch predetermined pressures and previous values from GAS
   async function fetchSheetData() {
     // gather primary identifiers
@@ -602,14 +636,32 @@ document.getElementById('backBtn')?.addEventListener('click',()=>{
     try {
       const url = new URL(SHEETS_URL);
       if (SHEETS_KEY) url.searchParams.set('key', SHEETS_KEY);
-      if (station)    url.searchParams.set('station', station);
-      if (model)      url.searchParams.set('model',   model);
-      if (plate_full) url.searchParams.set('plate_full', plate_full);
+      // send identifiers in multiple forms to maximize compatibility
+      if (station) {
+        url.searchParams.set('station', station);
+        url.searchParams.set('s', station);
+      }
+      if (model) {
+        url.searchParams.set('model', model);
+        url.searchParams.set('m', model);
+      }
+      if (plate_full) {
+        url.searchParams.set('plate_full', plate_full);
+        url.searchParams.set('plate', plate_full);
+        url.searchParams.set('p', plate_full);
+      }
       const res = await fetch(url.toString());
-      if (!res || !res.ok) return;
+      if (!res || !res.ok) {
+        // even if fetch fails, ensure fallback placeholders are shown
+        updatePrevFields({});
+        return;
+      }
       let data;
       try { data = await res.json(); } catch (e) { data = null; }
-      if (!data || typeof data !== 'object') return;
+      if (!data || typeof data !== 'object') {
+        updatePrevFields({});
+        return;
+      }
       // populate standard pressures only if fields are empty
       if (data.std_f) {
         const el = document.querySelector('[name="std_f"]');
@@ -619,32 +671,20 @@ document.getElementById('backBtn')?.addEventListener('click',()=>{
         const el = document.querySelector('[name="std_r"]');
         if (el && !el.value) el.value = data.std_r;
       }
-      // populate previous values for individual tires
+      // determine previous values map
+      let prevData = {};
       if (data.prev && typeof data.prev === 'object') {
-        Object.keys(data.prev).forEach(key => {
-          const val = data.prev[key];
-          if (!val) return;
-          const parts = key.split('_');
-          if (parts.length !== 2) return;
-          const field = parts[0];
-          const pos   = parts[1];
-          const inputId = `${field}_${pos}`;
-          const inlineEl = document.getElementById(inputId)?.closest('.inline');
-          if (!inlineEl) return;
-          const capEl = inlineEl.querySelector('.cap');
-          if (!capEl) return;
-          // create or update the span for previous value
-          let span = capEl.querySelector('.prev-val');
-          if (!span) {
-            span = document.createElement('span');
-            span.className = 'prev-val';
-            capEl.appendChild(span);
-          }
-          span.textContent = `(前回 ${val})`;
+        prevData = data.prev;
+      } else {
+        // some GAS may return flat object with keys matching field IDs
+        FIELD_IDS.forEach(id => {
+          if (data[id] != null) prevData[id] = data[id];
         });
       }
+      updatePrevFields(prevData);
     } catch (e) {
-      // ignore network or parsing errors silently
+      // on error, still show fallback placeholders
+      updatePrevFields({});
     }
   }
 
