@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <title>タイヤ点検アプリ（本番・黒×オレンジ） V7c</title>
-  <link rel="stylesheet" href="style.css?v=V7c"/>
+  <title>タイヤ点検アプリ（本番・黒×オレンジ） V7d</title>
+  <link rel="stylesheet" href="style.css?v=V7d"/>
 </head>
 <body>
-  <div class="ver-badge">V7c</div>
+  <div class="ver-badge">V7d</div>
   <header>
     <h1>タイヤ点検</h1>
   </header>
@@ -30,24 +30,72 @@
         </div>
       </div>
 
-      <p class="title">入力</p>
-      <div class="grid">
-        <!-- RF -->
-        <div class="inline"><div class="cap">残溝 RF <span class="prev-val" data-for="tread_rf"></span></div><input id="tread_rf" inputmode="decimal"></div>
-        <div class="inline"><div class="cap">空気圧 RF <span class="prev-val" data-for="pre_rf"></span></div><input id="pre_rf" inputmode="numeric"></div>
-        <div class="inline"><div class="cap">製造 RF <span class="prev-val" data-for="dot_rf"></span></div><input id="dot_rf" inputmode="numeric"></div>
-        <!-- LF -->
-        <div class="inline"><div class="cap">残溝 LF <span class="prev-val" data-for="tread_lf"></span></div><input id="tread_lf" inputmode="decimal"></div>
-        <div class="inline"><div class="cap">空気圧 LF <span class="prev-val" data-for="pre_lf"></span></div><input id="pre_lf" inputmode="numeric"></div>
-        <div class="inline"><div class="cap">製造 LF <span class="prev-val" data-for="dot_lf"></span></div><input id="dot_lf" inputmode="numeric"></div>
-        <!-- LR -->
-        <div class="inline"><div class="cap">残溝 LR <span class="prev-val" data-for="tread_lr"></span></div><input id="tread_lr" inputmode="decimal"></div>
-        <div class="inline"><div class="cap">空気圧 LR <span class="prev-val" data-for="pre_lr"></span></div><input id="pre_lr" inputmode="numeric"></div>
-        <div class="inline"><div class="cap">製造 LR <span class="prev-val" data-for="dot_lr"></span></div><input id="dot_lr" inputmode="numeric"></div>
-        <!-- RR -->
-        <div class="inline"><div class="cap">残溝 RR <span class="prev-val" data-for="tread_rr"></span></div><input id="tread_rr" inputmode="decimal"></div>
-        <div class="inline"><div class="cap">空気圧 RR <span class="prev-val" data-for="pre_rr"></span></div><input id="pre_rr" inputmode="numeric"></div>
-        <div class="inline"><div class="cap">製造 RR <span class="prev-val" data-for="dot_rr"></span></div><input id="dot_rr" inputmode="numeric"></div>
+      <p class="title">タイヤ別入力</p>
+      <div class="tire-list">
+        <!-- Row for RF -->
+        <div class="tire-row">
+          <div class="inline">
+            <div class="cap">残溝 <span class="prev-val" data-for="tread_rf"></span></div>
+            <input id="tread_rf" inputmode="decimal">
+          </div>
+          <div class="inline">
+            <div class="cap">空気圧 <span class="prev-val" data-for="pre_rf"></span></div>
+            <input id="pre_rf" inputmode="numeric">
+          </div>
+          <div class="inline">
+            <div class="cap">製造 <span class="prev-val" data-for="dot_rf"></span></div>
+            <input id="dot_rf" inputmode="numeric">
+          </div>
+          <div class="lab">RF</div>
+        </div>
+        <!-- Row for LF -->
+        <div class="tire-row">
+          <div class="inline">
+            <div class="cap">残溝 <span class="prev-val" data-for="tread_lf"></span></div>
+            <input id="tread_lf" inputmode="decimal">
+          </div>
+          <div class="inline">
+            <div class="cap">空気圧 <span class="prev-val" data-for="pre_lf"></span></div>
+            <input id="pre_lf" inputmode="numeric">
+          </div>
+          <div class="inline">
+            <div class="cap">製造 <span class="prev-val" data-for="dot_lf"></span></div>
+            <input id="dot_lf" inputmode="numeric">
+          </div>
+          <div class="lab">LF</div>
+        </div>
+        <!-- Row for LR -->
+        <div class="tire-row">
+          <div class="inline">
+            <div class="cap">残溝 <span class="prev-val" data-for="tread_lr"></span></div>
+            <input id="tread_lr" inputmode="decimal">
+          </div>
+          <div class="inline">
+            <div class="cap">空気圧 <span class="prev-val" data-for="pre_lr"></span></div>
+            <input id="pre_lr" inputmode="numeric">
+          </div>
+          <div class="inline">
+            <div class="cap">製造 <span class="prev-val" data-for="dot_lr"></span></div>
+            <input id="dot_lr" inputmode="numeric">
+          </div>
+          <div class="lab">LR</div>
+        </div>
+        <!-- Row for RR -->
+        <div class="tire-row">
+          <div class="inline">
+            <div class="cap">残溝 <span class="prev-val" data-for="tread_rr"></span></div>
+            <input id="tread_rr" inputmode="decimal">
+          </div>
+          <div class="inline">
+            <div class="cap">空気圧 <span class="prev-val" data-for="pre_rr"></span></div>
+            <input id="pre_rr" inputmode="numeric">
+          </div>
+          <div class="inline">
+            <div class="cap">製造 <span class="prev-val" data-for="dot_rr"></span></div>
+            <input id="dot_rr" inputmode="numeric">
+          </div>
+          <div class="lab">RR</div>
+        </div>
       </div>
 
       <div class="actions">
@@ -60,6 +108,6 @@
     window.SHEETS_URL = "https://script.google.com/macros/s/AKfycbyo2U1_TBxvzhJL50GHY8S0NeT1k0kueWb4tI1q2Oaw87NuGXqwjO7PWyCDdqFNZTdz/exec";
     window.SHEETS_KEY = "tl1";
   </script>
-  <script src="app.js?v=V7c" defer></script>
+  <script src="app.js?v=V7d" defer></script>
 </body>
 </html>

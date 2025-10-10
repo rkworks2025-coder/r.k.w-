@@ -23,3 +23,30 @@ input{ width:100%; padding:10px 12px; margin-top:4px; border-radius:10px; border
 .actions{ margin-top:14px; text-align:right; }
 .primary{ padding:10px 14px; background:var(--brand); color:#000; border:0; border-radius:10px; font-weight:700; }
 .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:16px; background:#222; border:1px solid #333; color:#fff; padding:10px 14px; border-radius:10px; }
+
+/* === Tire list layout === */
+.tire-list{
+  display:grid;
+  gap:10px;
+  margin-top:10px;
+}
+
+.tire-row{
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr 48px;
+  gap:10px;
+  align-items:end;
+}
+
+.lab{
+  font-weight:700;
+  text-align:right;
+  color:var(--muted);
+  padding-bottom:4px;
+}
+
+/* allow inline groups to stack label and input vertically */
+.inline{
+  display:grid;
+  gap:2px;
+}

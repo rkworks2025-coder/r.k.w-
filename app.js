@@ -22,7 +22,8 @@
     const st = gv('[name="station"]');
     const pf = gv('[name="plate_full"]');
     const md = gv('[name="model"]');
-    return `v7c:${encodeURIComponent(st)}|${encodeURIComponent(pf)}|${encodeURIComponent(md)}`;
+    // include version to avoid cross-version storage collisions
+    return `v7d:${encodeURIComponent(st)}|${encodeURIComponent(pf)}|${encodeURIComponent(md)}`;
   }
 
   // ===== 解錠/施錠 時刻 永続化（車両単位） =====
