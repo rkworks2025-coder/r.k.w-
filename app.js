@@ -81,10 +81,11 @@ function showToast(msg){
 async function postToSheet(payload){
   try{
     if(!SHEETS_URL){ showToast('送信しました'); return; }
-    const body = new URLSearchParams();
-    if (SHEETS_KEY) body.set('key', SHEETS_KEY);
-    body.set('json', JSON.stringify(payload));
-    await fetch(SHEETS_URL, { method:'POST', body });
+    // send data via query parameters instead of POST body to improve GAS compatibility
+    const url = new URL(SHEETS_URL);
+    if (SHEETS_KEY) url.searchParams.set('key', SHEETS_KEY);
+    url.searchParams.set('json', JSON.stringify(payload));
+    await fetch(url.toString());
   }catch(_){}
   showToast('送信しました');
 }
@@ -593,19 +594,17 @@ document.getElementById('backBtn')?.addEventListener('click',()=>{
   // fetch predetermined pressures and previous values from GAS
   async function fetchSheetData() {
     // gather primary identifiers
-    const station = gv('[name="station"]');
-    const model   = gv('[name="model"]');
-    const plate   = gv('[name="plate_full"]');
+    const station    = gv('[name="station"]');
+    const model      = gv('[name="model"]');
+    const plate_full = gv('[name="plate_full"]');
     // require at least one identifier
-    if (!(station || model || plate)) return;
+    if (!(station || model || plate_full)) return;
     try {
       const url = new URL(SHEETS_URL);
       if (SHEETS_KEY) url.searchParams.set('key', SHEETS_KEY);
-      if (station) url.searchParams.set('station', station);
-      if (model)   url.searchParams.set('model', model);
-      if (plate)   url.searchParams.set('plate', plate);
-      // explicit mode hint for GAS; gracefully ignored if unsupported
-      url.searchParams.set('mode', 'fetch');
+      if (station)    url.searchParams.set('station', station);
+      if (model)      url.searchParams.set('model',   model);
+      if (plate_full) url.searchParams.set('plate_full', plate_full);
       const res = await fetch(url.toString());
       if (!res || !res.ok) return;
       let data;
