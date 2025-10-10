@@ -1,5 +1,5 @@
 
-// V7a — enhanced: persist stamp times, robust GAS send/receive, and fallback previous-value display
+// V7b — enhanced: persist stamp times per vehicle, robust GAS send/receive with sheet tab, and fallback previous-value display
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyo2U1_TBxvzhJL50GHY8S0NeT1k0kueWb4tI1q2Oaw87NuGXqwjO7PWyCDdqFNZTdz/exec';
 const SHEETS_KEY = 'tl1';
 
@@ -84,6 +84,10 @@ async function postToSheet(payload){
     // send data via query parameters instead of POST body to improve GAS compatibility
     const url = new URL(SHEETS_URL);
     if (SHEETS_KEY) url.searchParams.set('key', SHEETS_KEY);
+    // include sheet/tab name for write operations
+    url.searchParams.set('sheet', 'Tirelog');
+    url.searchParams.set('tab', 'Tirelog');
+    url.searchParams.set('sheetName', 'Tirelog');
     url.searchParams.set('json', JSON.stringify(payload));
     await fetch(url.toString());
   }catch(_){}
@@ -562,25 +566,42 @@ document.getElementById('backBtn')?.addEventListener('click',()=>{
 
 // === v5f enhancements: persist unlock/lock times and fetch data from Google Sheets ===
 (() => {
-  // keys used for localStorage to persist unlock/lock times across reloads
-  const UNLOCK_KEY = 'v5f_unlockTime';
-  const LOCK_KEY   = 'v5f_lockTime';
+  // derive a unique storage key for unlock/lock times per vehicle
+  function timesKey() {
+    const st   = gv('[name="station"]') || '';
+    const md   = gv('[name="model"]')   || '';
+    const pl   = gv('[name="plate_full"]') || '';
+    return `v7b:times:${encodeURIComponent(st)}|${encodeURIComponent(pl)}|${encodeURIComponent(md)}`;
+  }
 
-  // on load, restore times if present
-  document.addEventListener('DOMContentLoaded', () => {
+  // restore times for current vehicle or clear if none
+  function updateTimesFromStorage() {
     try {
-      const ut = localStorage.getItem(UNLOCK_KEY);
-      if (ut && unlockTimeEl) unlockTimeEl.textContent = ut;
-      const lt = localStorage.getItem(LOCK_KEY);
-      if (lt && lockTimeEl)   lockTimeEl.textContent   = lt;
-    } catch (e) {}
-  }, { once: true });
+      const key = timesKey();
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const obj = JSON.parse(raw);
+        if (obj && obj.unlock && unlockTimeEl) unlockTimeEl.textContent = obj.unlock;
+        else if (unlockTimeEl) unlockTimeEl.textContent = '--:--';
+        if (obj && obj.lock   && lockTimeEl)   lockTimeEl.textContent   = obj.lock;
+        else if (lockTimeEl)   lockTimeEl.textContent   = '--:--';
+      } else {
+        // no entry -> clear times
+        if (unlockTimeEl) unlockTimeEl.textContent = '--:--';
+        if (lockTimeEl)   lockTimeEl.textContent   = '--:--';
+      }
+    } catch (e) {
+      if (unlockTimeEl) unlockTimeEl.textContent = '--:--';
+      if (lockTimeEl)   lockTimeEl.textContent   = '--:--';
+    }
+  }
 
-  // helper to persist current times
+  // persist current times for current vehicle
   function persistTimes() {
     try {
-      if (unlockTimeEl) localStorage.setItem(UNLOCK_KEY, unlockTimeEl.textContent || '');
-      if (lockTimeEl)   localStorage.setItem(LOCK_KEY,   lockTimeEl.textContent   || '');
+      const key = timesKey();
+      const data = { unlock: unlockTimeEl?.textContent || '', lock: lockTimeEl?.textContent || '' };
+      localStorage.setItem(key, JSON.stringify(data));
     } catch (e) {}
   }
 
@@ -637,6 +658,10 @@ document.getElementById('backBtn')?.addEventListener('click',()=>{
       const url = new URL(SHEETS_URL);
       if (SHEETS_KEY) url.searchParams.set('key', SHEETS_KEY);
       // send identifiers in multiple forms to maximize compatibility
+      // always include sheet/tab name for lookup
+      url.searchParams.set('sheet', 'Tirelog');
+      url.searchParams.set('tab', 'Tirelog');
+      url.searchParams.set('sheetName', 'Tirelog');
       if (station) {
         url.searchParams.set('station', station);
         url.searchParams.set('s', station);
@@ -698,10 +723,14 @@ document.getElementById('backBtn')?.addEventListener('click',()=>{
   document.addEventListener('DOMContentLoaded', () => {
     ['station', 'model', 'plate_full'].forEach(name => {
       document.querySelectorAll(`[name="${name}"]`).forEach(el => {
-        el.addEventListener('change', debounceFetch, { passive: true });
-        el.addEventListener('input',  debounceFetch, { passive: true });
+        el.addEventListener('change', () => { debounceFetch(); updateTimesFromStorage(); }, { passive: true });
+        el.addEventListener('input',  () => { debounceFetch(); updateTimesFromStorage(); }, { passive: true });
       });
     });
+    // show placeholders for previous values immediately
+    updatePrevFields({});
+    // restore times for current vehicle on load
+    updateTimesFromStorage();
     // perform initial fetch in case URL params prefill fields
     debounceFetch();
   }, { once: true });
