@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <title>タイヤ点検アプリ（本番・黒×オレンジ） V7e</title>
+  <title>タイヤ点検アプリ（本番・黒×オレンジ） V7f</title>
   <link rel="stylesheet" href="style.css?v=V7e"/>
 </head>
 <body>
-  <div class="ver-badge">V7e</div>
+  <div class="ver-badge">V7f</div>
   <header>
     <h1>タイヤ点検</h1>
   </header>
@@ -98,16 +98,25 @@
         </div>
       </div>
 
-      <div class="actions">
-        <button id="sendBtn" class="primary" type="button">スプレッドシートへ送信</button>
+      <!-- form footer: complete button for result view -->
+      <div class="foot section">
+        <button id="submitBtn" class="btn primary" type="submit">完了 → 結果表示</button>
       </div>
     </form>
+    <!-- result card -->
+    <div class="card" id="resultCard" style="display:none;">
+      <p class="title">結果</p>
+      <div class="mono" id="res_header"></div>
+      <div class="mono" id="res_times"></div>
+      <div class="mono" id="res_lines"></div>
+      <div class="foot section"><button class="btn" id="backBtn" type="button">入力に戻る</button></div>
+    </div>
   </div>
   <div id="toast" class="toast" hidden></div>
   <script>
     window.SHEETS_URL = "https://script.google.com/macros/s/AKfycbyo2U1_TBxvzhJL50GHY8S0NeT1k0kueWb4tI1q2Oaw87NuGXqwjO7PWyCDdqFNZTdz/exec";
     window.SHEETS_KEY = "tl1";
   </script>
-  <script src="app.js?v=V7e" defer></script>
+  <script src="app.js?v=V7f" defer></script>
 </body>
 </html>

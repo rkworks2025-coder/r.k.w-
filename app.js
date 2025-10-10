@@ -5,12 +5,20 @@
 
   // ===== 要素 =====
   const form = document.getElementById('form');
-  const sendBtn = document.getElementById('sendBtn');
+  // submitBtn handles final submit to show result; sendBtn is not used in v7f
+  const submitBtn = document.getElementById('submitBtn');
   const unlockBtn = document.getElementById('unlockBtn');
   const lockBtn   = document.getElementById('lockBtn');
   const unlockTimeEl = document.getElementById('unlockTime');
   const lockTimeEl   = document.getElementById('lockTime');
   const toast = document.getElementById('toast');
+
+  // result card elements (for result view)
+  const resultCard = document.getElementById('resultCard');
+  const resHeader  = document.getElementById('res_header');
+  const resTimes   = document.getElementById('res_times');
+  const resLines   = document.getElementById('res_lines');
+  const backBtn    = document.getElementById('backBtn');
 
   // ===== ユーティリティ =====
   const qs = (s, root=document) => root.querySelector(s);
@@ -23,7 +31,7 @@
     const pf = gv('[name="plate_full"]');
     const md = gv('[name="model"]');
     // include version to avoid cross-version storage collisions
-    return `v7e:${encodeURIComponent(st)}|${encodeURIComponent(pf)}|${encodeURIComponent(md)}`;
+    return `v7f:${encodeURIComponent(st)}|${encodeURIComponent(pf)}|${encodeURIComponent(md)}`;
   }
 
   // ===== 解錠/施錠 時刻 永続化（車両単位） =====
@@ -189,7 +197,7 @@
     });
     unlockBtn?.addEventListener('click', ()=> stampNow(unlockTimeEl));
     lockBtn?.addEventListener('click',   ()=> stampNow(lockTimeEl));
-    sendBtn?.addEventListener('click',   postToSheet);
+    // sendBtn is unused in v7f; form submission handles sending
   }
 
   // ===== オートアドバンス =====
@@ -226,6 +234,19 @@
     const num = parseInt(raw, 10);
     if(isNaN(num)) return '';
     return (num / 10).toFixed(1);
+  }
+
+  // current date/time in JST (MM/DD HH:mm)
+  function nowJST(){
+    const d = new Date();
+    // convert to JST by adding timezone offset (9 hours)
+    const utc  = d.getTime() + d.getTimezoneOffset() * 60000;
+    const jst  = new Date(utc + 9 * 60 * 60000);
+    const mm   = String(jst.getMonth() + 1).padStart(2, '0');
+    const dd   = String(jst.getDate()).padStart(2, '0');
+    const HH   = String(jst.getHours()).padStart(2, '0');
+    const MM   = String(jst.getMinutes()).padStart(2, '0');
+    return mm + '/' + dd + ' ' + HH + ':' + MM;
   }
 
   // focus the next element in the sequence after the given id
@@ -289,6 +310,45 @@
     wire();
     // initialize auto-advance for inputs
     setupAutoAdvance();
+
+    // handle form submission: build result view and send data
+    if(form){
+      form.addEventListener('submit', async ev => {
+        ev.preventDefault();
+        const p = collectPayload();
+        // update result header (station optional)
+        let header = '';
+        if(p.station) header += p.station + '\n';
+        header += p.plate_full + '\n' + p.model;
+        if(resHeader) resHeader.textContent = header;
+        // update times display
+        if(resTimes) resTimes.innerHTML = `解錠　${p.unlock || '--:--'}<br>施錠　${p.lock || '--:--'}`;
+        // build result lines (normative row placed between times and RF)
+        const lines = [];
+        if(p.std_f && p.std_r) lines.push(`${p.std_f}-${p.std_r}`);
+        lines.push(`${p.tread_rf || ''} ${p.pre_rf || ''} ${p.dot_rf || ''}   RF`);
+        lines.push(`${p.tread_lf || ''} ${p.pre_lf || ''} ${p.dot_lf || ''}   LF`);
+        lines.push(`${p.tread_lr || ''} ${p.pre_lr || ''} ${p.dot_lr || ''}   LR`);
+        lines.push(`${p.tread_rr || ''} ${p.pre_rr || ''} ${p.dot_rr || ''}   RR`);
+        lines.push('');
+        lines.push(nowJST());
+        if(resLines) resLines.textContent = lines.join('\n');
+        // toggle views
+        if(form) form.style.display = 'none';
+        if(resultCard) resultCard.style.display = 'block';
+        window.scrollTo({top:0, behavior:'smooth'});
+        // send data to GAS
+        await postToSheet();
+      });
+    }
+    // handle back button: return to input form
+    if(backBtn){
+      backBtn.addEventListener('click', () => {
+        if(resultCard) resultCard.style.display = 'none';
+        if(form) form.style.display = 'block';
+        window.scrollTo({top:0, behavior:'smooth'});
+      });
+    }
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init, {once:true});

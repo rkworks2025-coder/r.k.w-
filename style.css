@@ -22,8 +22,56 @@ input{ width:100%; padding:10px 12px; margin-top:4px; border-radius:10px; border
 .stamp-title{ font-weight:700; }
 .stamp-btn{ padding:6px 10px; background:#222; color:#fff; border:1px solid #333; border-radius:8px; }
 .stamp-time{ font-size:22px; text-align:center; letter-spacing:1px; }
-.actions{ margin-top:14px; text-align:right; }
-.primary{ padding:10px 14px; background:var(--brand); color:#000; border:0; border-radius:10px; font-weight:700; }
+/* old actions section removed; foot/button classes introduced */
+/* generic button styles */
+.btn{
+  appearance:none;
+  border:1px solid #333;
+  background:#222;
+  color:#fff;
+  padding:9px 12px;
+  border-radius:12px;
+  font-size:16px;
+  text-align:center;
+}
+.btn.primary{
+  background:var(--brand);
+  color:#000;
+  border-color:var(--brand);
+}
+/* form footer section */
+.foot{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+/* section divider for foot */
+.section{
+  margin-top:6px;
+  padding-top:6px;
+  border-top:1px dashed #333;
+}
+/* mono font for result display */
+.mono{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: pre-wrap;
+  color:var(--fg);
+}
+/* result card font sizes */
+#resultCard{
+  font-size:22px;
+}
+#res_header{
+  font-size:1.2em;
+}
+#res_times{
+  font-size:1.1em;
+  line-height:1.35;
+}
+#res_lines{
+  font-size:1.15em;
+  line-height:1.55;
+}
 .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:16px; background:#222; border:1px solid #333; color:#fff; padding:10px 14px; border-radius:10px; }
 
 /* === Tire list layout === */
