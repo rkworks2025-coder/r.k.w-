@@ -1,74 +1,65 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
-<title>タイヤ点検アプリ（本番・黒×オレンジ） V7b</title>
-<!-- bump stylesheet version to avoid caching -->
-<link href="style.css?v=V7b" rel="stylesheet"/></head>
-<body><div class="ver-badge">V7b</div>
-<header>
-<h1>タイヤ点検</h1>
-</header>
-<div class="wrap">
-<form class="card" id="form" onsubmit="return false;">
-<p class="title">車両情報</p>
-<div class="veh-rows">
-<div><label>ステーション名 <input name="station" required="" type="text"/></label></div>
-<div class="veh-row2">
-<div><label>車種 <input name="model" required="" type="text"/></label></div>
-<div><label>フルナンバー <input name="plate_full" required="" type="text"/></label></div>
-</div>
-<div class="std-row">
-<div><label>規定圧（前）kPa <span class="hint">任意</span><input inputmode="numeric" name="std_f" type="text"/></label></div>
-<div><label>規定圧（後）kPa <span class="hint">任意</span><input inputmode="numeric" name="std_r" type="text"/></label></div>
-</div>
-<div class="time-stamp">
-<div class="stamp-card">
-<div class="stamp-head"><div class="stamp-title">解錠</div><button class="stamp-btn" id="unlockBtn" type="button">記録</button></div>
-<div class="stamp-time" id="unlockTime">--:--</div>
-<div class="muted" id="unlockNote"></div>
-</div>
-<div class="stamp-card">
-<div class="stamp-head"><div class="stamp-title">施錠</div><button class="stamp-btn" id="lockBtn" type="button">記録</button></div>
-<div class="stamp-time" id="lockTime">--:--</div>
-<div class="muted" id="lockNote"></div>
-</div>
-</div>
-</div>
-<p class="title section">タイヤ別入力</p>
-<div class="tire-list">
-<div class="tire-row"><div class="inline"><div class="cap">残溝</div><input id="tread_rf" inputmode="numeric" type="text"/></div>
-<div class="inline"><div class="cap">空気圧</div><input id="pre_rf" inputmode="numeric" type="text"/></div>
-<div class="inline"><div class="cap">製造</div><input id="dot_rf" inputmode="numeric" maxlength="4" type="text"/></div>
-<div class="lab">RF</div></div>
-<div class="tire-row"><div class="inline"><div class="cap">残溝</div><input id="tread_lf" inputmode="numeric" type="text"/></div>
-<div class="inline"><div class="cap">空気圧</div><input id="pre_lf" inputmode="numeric" type="text"/></div>
-<div class="inline"><div class="cap">製造</div><input id="dot_lf" inputmode="numeric" maxlength="4" type="text"/></div>
-<div class="lab">LF</div></div>
-<div class="tire-row"><div class="inline"><div class="cap">残溝</div><input id="tread_lr" inputmode="numeric" type="text"/></div>
-<div class="inline"><div class="cap">空気圧</div><input id="pre_lr" inputmode="numeric" type="text"/></div>
-<div class="inline"><div class="cap">製造</div><input id="dot_lr" inputmode="numeric" maxlength="4" type="text"/></div>
-<div class="lab">LR</div></div>
-<div class="tire-row"><div class="inline"><div class="cap">残溝</div><input id="tread_rr" inputmode="numeric" type="text"/></div>
-<div class="inline"><div class="cap">空気圧</div><input id="pre_rr" inputmode="numeric" type="text"/></div>
-<div class="inline"><div class="cap">製造</div><input id="dot_rr" inputmode="numeric" maxlength="4" type="text"/></div>
-<div class="lab">RR</div></div>
-</div>
-<div class="foot section">
-<button class="btn primary" id="submitBtn" type="submit">完了 → 結果表示</button>
-</div>
-</form>
-<div class="card" id="resultCard" style="display:none;">
-<p class="title">結果</p>
-<div class="mono" id="res_header"></div>
-<div class="mono" id="res_times"></div>
-<div class="mono" id="res_lines"></div>
-<div class="foot section"><button class="btn" id="backBtn">入力に戻る</button></div>
-</div>
-</div>
-<div class="toast" id="toast">送信しました</div>
-<!-- bump script version to v5f -->
-<script defer="True" src="app.js?v=V7b"></script></body>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <title>タイヤ点検アプリ（本番・黒×オレンジ） V7c</title>
+  <link rel="stylesheet" href="style.css?v=V7c"/>
+</head>
+<body>
+  <div class="ver-badge">V7c</div>
+  <header>
+    <h1>タイヤ点検</h1>
+  </header>
+  <div class="wrap">
+    <form id="form" class="card" onsubmit="return false;">
+      <p class="title">車両情報</p>
+      <div class="veh-rows">
+        <div><label>ステーション名 <input type="text" name="station" required></label></div>
+        <div class="veh-row2">
+          <div><label>車種 <input type="text" name="model" required></label></div>
+          <div><label>フルナンバー <input type="text" name="plate_full" required></label></div>
+        </div>
+        <div class="std-row">
+          <div><label>規定圧（前）kPa <span class="hint">任意</span><input name="std_f" inputmode="numeric"></label></div>
+          <div><label>規定圧（後）kPa <span class="hint">任意</span><input name="std_r" inputmode="numeric"></label></div>
+        </div>
+        <div class="time-stamp">
+          <div class="stamp-card"><div class="stamp-head"><div class="stamp-title">解錠</div><button type="button" id="unlockBtn" class="stamp-btn">記録</button></div><div id="unlockTime" class="stamp-time">--:--</div></div>
+          <div class="stamp-card"><div class="stamp-head"><div class="stamp-title">施錠</div><button type="button" id="lockBtn" class="stamp-btn">記録</button></div><div id="lockTime" class="stamp-time">--:--</div></div>
+        </div>
+      </div>
+
+      <p class="title">入力</p>
+      <div class="grid">
+        <!-- RF -->
+        <div class="inline"><div class="cap">残溝 RF <span class="prev-val" data-for="tread_rf"></span></div><input id="tread_rf" inputmode="decimal"></div>
+        <div class="inline"><div class="cap">空気圧 RF <span class="prev-val" data-for="pre_rf"></span></div><input id="pre_rf" inputmode="numeric"></div>
+        <div class="inline"><div class="cap">製造 RF <span class="prev-val" data-for="dot_rf"></span></div><input id="dot_rf" inputmode="numeric"></div>
+        <!-- LF -->
+        <div class="inline"><div class="cap">残溝 LF <span class="prev-val" data-for="tread_lf"></span></div><input id="tread_lf" inputmode="decimal"></div>
+        <div class="inline"><div class="cap">空気圧 LF <span class="prev-val" data-for="pre_lf"></span></div><input id="pre_lf" inputmode="numeric"></div>
+        <div class="inline"><div class="cap">製造 LF <span class="prev-val" data-for="dot_lf"></span></div><input id="dot_lf" inputmode="numeric"></div>
+        <!-- LR -->
+        <div class="inline"><div class="cap">残溝 LR <span class="prev-val" data-for="tread_lr"></span></div><input id="tread_lr" inputmode="decimal"></div>
+        <div class="inline"><div class="cap">空気圧 LR <span class="prev-val" data-for="pre_lr"></span></div><input id="pre_lr" inputmode="numeric"></div>
+        <div class="inline"><div class="cap">製造 LR <span class="prev-val" data-for="dot_lr"></span></div><input id="dot_lr" inputmode="numeric"></div>
+        <!-- RR -->
+        <div class="inline"><div class="cap">残溝 RR <span class="prev-val" data-for="tread_rr"></span></div><input id="tread_rr" inputmode="decimal"></div>
+        <div class="inline"><div class="cap">空気圧 RR <span class="prev-val" data-for="pre_rr"></span></div><input id="pre_rr" inputmode="numeric"></div>
+        <div class="inline"><div class="cap">製造 RR <span class="prev-val" data-for="dot_rr"></span></div><input id="dot_rr" inputmode="numeric"></div>
+      </div>
+
+      <div class="actions">
+        <button id="sendBtn" class="primary" type="button">スプレッドシートへ送信</button>
+      </div>
+    </form>
+  </div>
+  <div id="toast" class="toast" hidden></div>
+  <script>
+    window.SHEETS_URL = "https://script.google.com/macros/s/AKfycbyo2U1_TBxvzhJL50GHY8S0NeT1k0kueWb4tI1q2Oaw87NuGXqwjO7PWyCDdqFNZTdz/exec";
+    window.SHEETS_KEY = "tl1";
+  </script>
+  <script src="app.js?v=V7c" defer></script>
+</body>
 </html>
