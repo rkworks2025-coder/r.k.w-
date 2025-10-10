@@ -23,7 +23,7 @@
     const pf = gv('[name="plate_full"]');
     const md = gv('[name="model"]');
     // include version to avoid cross-version storage collisions
-    return `v7d:${encodeURIComponent(st)}|${encodeURIComponent(pf)}|${encodeURIComponent(md)}`;
+    return `v7e:${encodeURIComponent(st)}|${encodeURIComponent(pf)}|${encodeURIComponent(md)}`;
   }
 
   // ===== 解錠/施錠 時刻 永続化（車両単位） =====
@@ -68,22 +68,30 @@
     'tread_rr','pre_rr','dot_rr'
   ];
   function fallbackFor(id){
-    if(id.startsWith('tread')) return '-.-';
+    // return placeholder strings without decimal or spaces for compact display
+    if(id.startsWith('tread')) return '--';
     if(id.startsWith('pre'))   return '---';
     return '----';
   }
   function showPrevPlaceholders(){
+    // show placeholders as (xx) without spaces or "前回" to minimize width
     document.querySelectorAll('.prev-val').forEach(span=>{
       const id = span.getAttribute('data-for');
-      span.textContent = `(前回 ${fallbackFor(id)})`;
+      span.textContent = `(${fallbackFor(id)})`;
     });
   }
   function applyPrev(prev){
+    // apply previous values; display as (value) without spaces or "前回" to keep label one-line
     FIELDS.forEach(id => {
       const span = document.querySelector(`.prev-val[data-for="${id}"]`);
       if(!span) return;
-      const v = (prev && prev[id] != null && String(prev[id]).trim()!=='' ) ? prev[id] : fallbackFor(id);
-      span.textContent = `(前回 ${v})`;
+      let v = '';
+      if(prev && prev[id] != null && String(prev[id]).trim() !== ''){
+        v = String(prev[id]).trim();
+      } else {
+        v = fallbackFor(id);
+      }
+      span.textContent = `(${v})`;
     });
   }
 
@@ -184,12 +192,103 @@
     sendBtn?.addEventListener('click',   postToSheet);
   }
 
+  // ===== オートアドバンス =====
+  // sequence of elements to focus in order, including standard pressure, tires and the unlock button
+  const AUTO_SEQUENCE = [
+    'std_f','std_r',
+    'tread_rf','pre_rf','dot_rf',
+    'tread_lf','pre_lf','dot_lf',
+    'tread_lr','pre_lr','dot_lr',
+    'tread_rr','pre_rr','dot_rr',
+    'unlockBtn'
+  ];
+
+  // rules defining the expected length of input for each field; decimal:true indicates 0.1 precision (two digits)
+  const FIELD_RULES = {
+    std_f: {len:3},
+    std_r: {len:3},
+    tread_rf: {len:2, decimal:true},
+    pre_rf: {len:3},
+    dot_rf: {len:4},
+    tread_lf: {len:2, decimal:true},
+    pre_lf: {len:3},
+    dot_lf: {len:4},
+    tread_lr: {len:2, decimal:true},
+    pre_lr: {len:3},
+    dot_lr: {len:4},
+    tread_rr: {len:2, decimal:true},
+    pre_rr: {len:3},
+    dot_rr: {len:4}
+  };
+
+  // convert two-digit tread input into a decimal with one decimal place
+  function formatTread(raw){
+    const num = parseInt(raw, 10);
+    if(isNaN(num)) return '';
+    return (num / 10).toFixed(1);
+  }
+
+  // focus the next element in the sequence after the given id
+  function focusNext(currentId){
+    const idx = AUTO_SEQUENCE.indexOf(currentId);
+    if(idx < 0) return;
+    const nextId = AUTO_SEQUENCE[idx + 1];
+    if(!nextId) return;
+    if(nextId === 'unlockBtn'){
+      const btn = document.getElementById('unlockBtn');
+      if(btn) btn.focus();
+      return;
+    }
+    const nextEl = document.getElementById(nextId) || document.querySelector(`[name="${nextId}"]`);
+    if(nextEl) nextEl.focus();
+  }
+
+  // setup auto-advance listeners on each relevant input
+  function setupAutoAdvance(){
+    AUTO_SEQUENCE.forEach(id => {
+      if(id === 'unlockBtn') return;
+      const el = document.getElementById(id) || document.querySelector(`[name="${id}"]`);
+      if(!el) return;
+      // handle input event for length-based advance
+      el.addEventListener('input', ev => {
+        const rule = FIELD_RULES[id];
+        if(!rule) return;
+        let raw = ev.target.value;
+        const digits = raw.replace(/\D/g, '');
+        if(rule.decimal){
+          // for tread fields, only convert if decimal not already set and we have required digits
+          if(!raw.includes('.') && digits.length >= rule.len){
+            const truncated = digits.slice(0, rule.len);
+            const formatted = formatTread(truncated);
+            ev.target.value = formatted;
+            focusNext(id);
+          }
+        }else{
+          if(digits.length >= rule.len){
+            const truncated = digits.slice(0, rule.len);
+            ev.target.value = truncated;
+            focusNext(id);
+          }
+        }
+      });
+      // allow enter key to advance
+      el.addEventListener('keydown', ev => {
+        if(ev.key === 'Enter'){
+          ev.preventDefault();
+          focusNext(id);
+        }
+      });
+    });
+  }
+
   function init(){
     applyUrl();
     showPrevPlaceholders();
     loadTimes();          // 同一車両なら復元、切替なら空へ
     fetchSheetData();     // 規定圧＆前回値取得
     wire();
+    // initialize auto-advance for inputs
+    setupAutoAdvance();
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init, {once:true});
