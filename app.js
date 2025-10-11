@@ -31,7 +31,7 @@
     const pf = gv('[name="plate_full"]');
     const md = gv('[name="model"]');
     // include version to avoid cross-version storage collisions
-    return `v7g:${encodeURIComponent(st)}|${encodeURIComponent(pf)}|${encodeURIComponent(md)}`;
+    return `v7h:${encodeURIComponent(st)}|${encodeURIComponent(pf)}|${encodeURIComponent(md)}`;
   }
 
   // ===== 解錠/施錠 時刻 永続化（車両単位） =====
@@ -94,10 +94,31 @@
       const span = document.querySelector(`.prev-val[data-for="${id}"]`);
       if(!span) return;
       let v = '';
+      // determine the raw value if present and non-empty
+      let raw = null;
       if(prev && prev[id] != null && String(prev[id]).trim() !== ''){
-        v = String(prev[id]).trim();
-      } else {
+        raw = prev[id];
+      }
+      if(raw === null){
+        // fallback placeholder
         v = fallbackFor(id);
+      } else {
+        if(id.startsWith('tread')){
+          // tread depth: ensure one decimal place (5 -> 5.0)
+          const num = parseFloat(raw);
+          if(!isNaN(num)){
+            v = num.toFixed(1);
+          }else{
+            v = String(raw).trim();
+          }
+        }else if(id.startsWith('dot')){
+          // DOT (manufacture week): pad to 4 digits with leading zeros
+          const s = String(raw).trim();
+          v = s.padStart(4, '0');
+        }else{
+          // other values (pressure): use as is
+          v = String(raw).trim();
+        }
       }
       span.textContent = `(${v})`;
     });

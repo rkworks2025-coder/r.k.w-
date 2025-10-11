@@ -15,7 +15,11 @@ input{ width:100%; padding:10px 12px; margin-top:4px; border-radius:10px; border
 .inline .cap{ display:flex; justify-content:space-between; align-items:center; gap:6px; font-size:12px; color:var(--muted); }
 /* keep label and previous value on a single line */
 .cap{ white-space:nowrap; }
-.cap .prev-val{ color:var(--brand); }
+/* increase font size of previous value to improve legibility */
+.cap .prev-val{
+  color:var(--brand);
+  font-size:14px;
+}
 .time-stamp{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
 .stamp-card{ background:#141414; border:1px solid #2a2a2a; border-radius:10px; padding:8px; }
 .stamp-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
