@@ -31,7 +31,7 @@
     const pf = gv('[name="plate_full"]');
     const md = gv('[name="model"]');
     // include version to avoid cross-version storage collisions
-    return `v7h:${encodeURIComponent(st)}|${encodeURIComponent(pf)}|${encodeURIComponent(md)}`;
+    return `v7i:${encodeURIComponent(st)}|${encodeURIComponent(pf)}|${encodeURIComponent(md)}`;
   }
 
   // ===== 解錠/施錠 時刻 永続化（車両単位） =====
@@ -197,7 +197,28 @@
       lock:   lockTimeEl.textContent||'',
       operator: ''
     };
+    // attach a formatted timestamp for the spreadsheet. Use JST and format as YYYY/MM/DD H:mm:ss
+    obj.timestamp_iso = timestampForSheet();
     return obj;
+  }
+
+  /**
+   * Returns current time in JST formatted as "YYYY/MM/DD H:mm:ss".
+   * Hours are not zero‑padded to mirror the older spreadsheet entries (e.g. 2025/09/17 1:38:14).
+   */
+  function timestampForSheet(){
+    const d = new Date();
+    // convert to JST by adjusting timezone offset (JST = UTC+9)
+    const utc = d.getTime() + d.getTimezoneOffset() * 60000;
+    const jst = new Date(utc + 9 * 60 * 60000);
+    const y  = jst.getFullYear();
+    const m  = String(jst.getMonth() + 1).padStart(2, '0');
+    const day = String(jst.getDate()).padStart(2, '0');
+    // do not pad hours to avoid leading zero for 0–9 hours
+    const h  = String(jst.getHours());
+    const mi = String(jst.getMinutes()).padStart(2, '0');
+    const s  = String(jst.getSeconds()).padStart(2, '0');
+    return `${y}/${m}/${day} ${h}:${mi}:${s}`;
   }
 
   // URLに station/plate_full/model が含まれていたら自動セット
