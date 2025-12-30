@@ -3,13 +3,11 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <!-- Update version: V7i -->
-  <title>タイヤ点検アプリ（本番・黒×オレンジ） V7i</title>
-  <link rel="stylesheet" href="style.css?v=V7i"/>
+  <title>タイヤ点検アプリ（本番・黒×オレンジ） V7k</title>
+  <link rel="stylesheet" href="style.css?v=V7k"/>
 </head>
 <body>
-  <!-- version badge -->
-  <div class="ver-badge">V7i</div>
+  <div class="ver-badge">V7k</div>
   <header>
     <h1>タイヤ点検</h1>
   </header>
@@ -34,7 +32,6 @@
 
       <p class="title">タイヤ別入力</p>
       <div class="tire-list">
-        <!-- Row for RF -->
         <div class="tire-row">
           <div class="inline">
             <div class="cap">残溝<span class="prev-val" data-for="tread_rf"></span></div>
@@ -50,7 +47,6 @@
           </div>
           <div class="lab">RF</div>
         </div>
-        <!-- Row for LF -->
         <div class="tire-row">
           <div class="inline">
             <div class="cap">残溝<span class="prev-val" data-for="tread_lf"></span></div>
@@ -66,7 +62,6 @@
           </div>
           <div class="lab">LF</div>
         </div>
-        <!-- Row for LR -->
         <div class="tire-row">
           <div class="inline">
             <div class="cap">残溝<span class="prev-val" data-for="tread_lr"></span></div>
@@ -82,7 +77,6 @@
           </div>
           <div class="lab">LR</div>
         </div>
-        <!-- Row for RR -->
         <div class="tire-row">
           <div class="inline">
             <div class="cap">残溝<span class="prev-val" data-for="tread_rr"></span></div>
@@ -100,12 +94,10 @@
         </div>
       </div>
 
-      <!-- form footer: complete button for result view -->
       <div class="foot section">
         <button id="submitBtn" class="btn primary" type="submit">完了 → 結果表示</button>
       </div>
     </form>
-    <!-- result card -->
     <div class="card" id="resultCard" style="display:none;">
       <p class="title">結果</p>
       <div class="mono" id="res_header"></div>
@@ -119,6 +111,6 @@
     window.SHEETS_URL = "https://script.google.com/macros/s/AKfycbyo2U1_TBxvzhJL50GHY8S0NeT1k0kueWb4tI1q2Oaw87NuGXqwjO7PWyCDdqFNZTdz/exec";
     window.SHEETS_KEY = "tl1";
   </script>
-  <script src="app.js?v=V7i" defer></script>
+  <script src="app.js?v=V7k" defer></script>
 </body>
 </html>
