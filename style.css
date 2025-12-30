@@ -104,18 +104,40 @@ input{ width:100%; padding:10px 12px; margin-top:4px; border-radius:10px; border
   gap:2px;
 }
 
-/* Update V7k: スマホ(幅480px以下)の時だけ余白を限界まで削る */
+/* Update V7L: スマホ(幅480px以下)向け極限圧縮レイアウト */
 @media (max-width: 480px) {
-  .wrap {
-    padding: 4px; /* 外枠の余白を16px→4pxへ */
-  }
-  .card {
-    padding: 8px; /* カード内余白を12px→8pxへ */
-  }
-  .veh-row2 {
-    gap: 4px; /* カラム間隔を8px→4pxへ */
-  }
+  /* 外枠・カード余白の削減 */
+  .wrap { padding: 2px; }
+  .card { padding: 6px; }
+  
+  /* 行間・要素間の隙間を削減 */
+  .veh-row2 { gap: 4px; }
+  .std-row { gap: 4px; margin-top: 4px; }
+  .time-stamp { gap: 4px; margin-top: 4px; }
+  .tire-list { gap: 2px; margin-top: 4px; } /* 行間を極力詰める */
+  .tire-row { gap: 2px; }
+  
+  /* 見出しの余白削減 */
+  .title { margin: 4px 0 2px; font-size: 14px; }
+  
+  /* 入力欄の高さ削減 */
   input {
-    padding: 10px 6px; /* 入力欄内の余白を左右6pxまで削る */
+    padding: 6px 4px; /* 上下左右を詰める */
+    margin-top: 1px;  /* ラベルとの隙間を詰める */
+    font-size: 16px;  /* 文字サイズは維持 */
   }
+  
+  /* ラベルの微調整 */
+  label { font-size: 11px; padding-bottom: 0; }
+  
+  /* タイムスタンプカードの圧縮 */
+  .stamp-card { padding: 4px; }
+  .stamp-head { margin-bottom: 2px; }
+  .stamp-time { font-size: 18px; line-height: 1.2; }
+  .stamp-btn { padding: 4px 8px; font-size: 12px; }
+  
+  /* ボタン類の余白調整 */
+  .foot { gap: 4px; }
+  .btn { padding: 8px 10px; }
+  .lab { font-size: 12px; padding-bottom: 6px; } /* タイヤ位置表示の位置調整 */
 }
