@@ -26,7 +26,6 @@ input{ width:100%; padding:10px 12px; margin-top:4px; border-radius:10px; border
 .stamp-title{ font-weight:700; }
 .stamp-btn{ padding:6px 10px; background:#222; color:#fff; border:1px solid #333; border-radius:8px; }
 .stamp-time{ font-size:22px; text-align:center; letter-spacing:1px; }
-/* old actions section removed; foot/button classes introduced */
 /* generic button styles */
 .btn{
   appearance:none;
@@ -103,4 +102,20 @@ input{ width:100%; padding:10px 12px; margin-top:4px; border-radius:10px; border
 .inline{
   display:grid;
   gap:2px;
+}
+
+/* Update V7k: スマホ(幅480px以下)の時だけ余白を限界まで削る */
+@media (max-width: 480px) {
+  .wrap {
+    padding: 4px; /* 外枠の余白を16px→4pxへ */
+  }
+  .card {
+    padding: 8px; /* カード内余白を12px→8pxへ */
+  }
+  .veh-row2 {
+    gap: 4px; /* カラム間隔を8px→4pxへ */
+  }
+  input {
+    padding: 10px 6px; /* 入力欄内の余白を左右6pxまで削る */
+  }
 }
