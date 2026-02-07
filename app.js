@@ -307,7 +307,11 @@
     if(!nextId) return;
     if(nextId === 'unlockBtn'){
       const btn = document.getElementById('unlockBtn');
-      if(btn) btn.focus();
+      if(btn) {
+        // iPhone Safariでのスクロールロックを打破するため、強制スクロール命令を追加
+        btn.scrollIntoView({ behavior: 'auto', block: 'center' });
+        btn.focus();
+      }
       return;
     }
     const nextEl = document.getElementById(nextId) || document.querySelector(`[name="${nextId}"]`);
