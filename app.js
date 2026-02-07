@@ -89,7 +89,8 @@
     });
   }
   function applyPrev(prev){
-    // apply previous values; display as (value) without spaces or "前回" to keep label one-line
+    // apply previous values;
+    // display as (value) without spaces or "前回" to keep label one-line
     FIELDS.forEach(id => {
       const span = document.querySelector(`.prev-val[data-for="${id}"]`);
       if(!span) return;
@@ -99,6 +100,7 @@
       if(prev && prev[id] != null && String(prev[id]).trim() !== ''){
         raw = prev[id];
       }
+      
       if(raw === null){
         // fallback placeholder
         v = fallbackFor(id);
@@ -126,26 +128,30 @@
 
   // ===== 取得（GET / doGet） =====
   async function fetchSheetData(){
+    // 前回データ読み込みのタイミングで時刻表示をリセット
+    if (unlockTimeEl) unlockTimeEl.textContent = '--:--';
+    if (lockTimeEl) lockTimeEl.textContent = '--:--';
+
     const st = gv('[name="station"]');
     const md = gv('[name="model"]');
     const pf = gv('[name="plate_full"]');
     if(!(st||md||pf)) return; // 何も無ければ問い合わせない
     if(!SHEETS_URL) return;
-
     const u = new URL(SHEETS_URL);
     u.searchParams.set('key', SHEETS_KEY);
     u.searchParams.set('op','read');          // GAS側は実質未使用でも害なし
-    u.searchParams.set('sheet','Tirelog');    // 同上
+    u.searchParams.set('sheet','Tirelog');
+    // 同上
     if(st) u.searchParams.set('station', st);
     if(md) u.searchParams.set('model', md);
     if(pf) u.searchParams.set('plate_full', pf);
-    u.searchParams.set('ts', Date.now());     // キャッシュ回避
+    u.searchParams.set('ts', Date.now());
+    // キャッシュ回避
 
     try{
       const res = await fetch(u.toString(), { cache:'no-store' });
       if(!res.ok) throw new Error('HTTP '+res.status);
       const data = await res.json();
-
       // 規定圧（未入力時だけ上書き）
       const f = qs('[name="std_f"]'); const r = qs('[name="std_r"]');
       if(data.std_f && f && !f.value) f.value = data.std_f;
@@ -160,7 +166,8 @@
 
   // ===== 送信（POST / doPost, x-www-form-urlencoded） =====
   async function postToSheet(){
-    if(!SHEETS_URL){ showToast('送信先未設定'); return; }
+    if(!SHEETS_URL){ showToast('送信先未設定');
+    return; }
     const payload = collectPayload();
     try{
       const body = new URLSearchParams();
@@ -224,7 +231,8 @@
   // URLに station/plate_full/model が含まれていたら自動セット
   function applyUrl(){
     const p = new URLSearchParams(location.search);
-    const set = (name) => { const v = p.get(name); if(v){ const el = qs(`[name="${name}"]`); if(el){ el.value = v; } } };
+    const set = (name) => { const v = p.get(name); if(v){ const el = qs(`[name="${name}"]`); if(el){ el.value = v;
+    } } };
     ['station','plate_full','model'].forEach(set);
   }
 
@@ -239,7 +247,8 @@
     });
     unlockBtn?.addEventListener('click', ()=> stampNow(unlockTimeEl));
     lockBtn?.addEventListener('click',   ()=> stampNow(lockTimeEl));
-    // sendBtn is unused in v7f; form submission handles sending
+    // sendBtn is unused in v7f;
+    // form submission handles sending
   }
 
   // ===== オートアドバンス =====
@@ -252,8 +261,8 @@
     'tread_rr','pre_rr','dot_rr',
     'unlockBtn'
   ];
-
-  // rules defining the expected length of input for each field; decimal:true indicates 0.1 precision (two digits)
+  // rules defining the expected length of input for each field;
+  // decimal:true indicates 0.1 precision (two digits)
   const FIELD_RULES = {
     std_f: {len:3},
     std_r: {len:3},
@@ -270,7 +279,6 @@
     pre_rr: {len:3},
     dot_rr: {len:4}
   };
-
   // convert two-digit tread input into a decimal with one decimal place
   function formatTread(raw){
     const num = parseInt(raw, 10);
@@ -317,6 +325,7 @@
         const rule = FIELD_RULES[id];
         if(!rule) return;
         let raw = ev.target.value;
+   
         const digits = raw.replace(/\D/g, '');
         if(rule.decimal){
           // for tread fields, only convert if decimal not already set and we have required digits
@@ -348,11 +357,11 @@
     applyUrl();
     showPrevPlaceholders();
     loadTimes();          // 同一車両なら復元、切替なら空へ
-    fetchSheetData();     // 規定圧＆前回値取得
+    fetchSheetData();
+    // 規定圧＆前回値取得
     wire();
     // initialize auto-advance for inputs
     setupAutoAdvance();
-
     // handle form submission: build result view and send data
     if(form){
       form.addEventListener('submit', async ev => {
@@ -362,6 +371,7 @@
         let header = '';
         if(p.station) header += p.station + '\n';
         header += p.plate_full + '\n' + p.model;
+       
         if(resHeader) resHeader.textContent = header;
         // update times display
         if(resTimes) resTimes.innerHTML = `解錠　${p.unlock || '--:--'}<br>施錠　${p.lock || '--:--'}`;
