@@ -135,11 +135,13 @@
     const st = gv('[name="station"]');
     const md = gv('[name="model"]');
     const pf = gv('[name="plate_full"]');
-    if(!(st||md||pf)) return; // 何も無ければ問い合わせない
+    if(!(st||md||pf)) return;
+    // 何も無ければ問い合わせない
     if(!SHEETS_URL) return;
     const u = new URL(SHEETS_URL);
     u.searchParams.set('key', SHEETS_KEY);
-    u.searchParams.set('op','read');          // GAS側は実質未使用でも害なし
+    u.searchParams.set('op','read');
+    // GAS側は実質未使用でも害なし
     u.searchParams.set('sheet','Tirelog');
     // 同上
     if(st) u.searchParams.set('station', st);
@@ -167,7 +169,7 @@
   // ===== 送信（POST / doPost, x-www-form-urlencoded） =====
   async function postToSheet(){
     if(!SHEETS_URL){ showToast('送信先未設定');
-    return; }
+      return; }
     const payload = collectPayload();
     try{
       const body = new URLSearchParams();
@@ -231,8 +233,7 @@
   // URLに station/plate_full/model が含まれていたら自動セット
   function applyUrl(){
     const p = new URLSearchParams(location.search);
-    const set = (name) => { const v = p.get(name); if(v){ const el = qs(`[name="${name}"]`); if(el){ el.value = v;
-    } } };
+    const set = (name) => { const v = p.get(name); if(v){ const el = qs(`[name="${name}"]`); if(el){ el.value = v; } } };
     ['station','plate_full','model'].forEach(set);
   }
 
@@ -245,7 +246,16 @@
         el.addEventListener('input',  h, {passive:true});
       });
     });
-    unlockBtn?.addEventListener('click', ()=> stampNow(unlockTimeEl));
+
+    // 修正: 解錠時刻記録後に完了ボタンへスクロール＆フォーカス
+    unlockBtn?.addEventListener('click', ()=> {
+      stampNow(unlockTimeEl);
+      if(submitBtn){
+        submitBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        submitBtn.focus();
+      }
+    });
+
     lockBtn?.addEventListener('click',   ()=> stampNow(lockTimeEl));
     // sendBtn is unused in v7f;
     // form submission handles sending
@@ -329,7 +339,7 @@
         const rule = FIELD_RULES[id];
         if(!rule) return;
         let raw = ev.target.value;
-   
+        
         const digits = raw.replace(/\D/g, '');
         if(rule.decimal){
           // for tread fields, only convert if decimal not already set and we have required digits
@@ -375,7 +385,7 @@
         let header = '';
         if(p.station) header += p.station + '\n';
         header += p.plate_full + '\n' + p.model;
-       
+        
         if(resHeader) resHeader.textContent = header;
         // update times display
         if(resTimes) resTimes.innerHTML = `解錠　${p.unlock || '--:--'}<br>施錠　${p.lock || '--:--'}`;
