@@ -16,6 +16,7 @@
   // result card elements (for result view)
   const resultCard = document.getElementById('resultCard');
   const resHeader  = document.getElementById('res_header');
+ 
   const resTimes   = document.getElementById('res_times');
   const resLines   = document.getElementById('res_lines');
   const backBtn    = document.getElementById('backBtn');
@@ -24,7 +25,6 @@
   const qs = (s, root=document) => root.querySelector(s);
   const gv = (sel) => { const el = typeof sel==='string'? qs(sel): sel; return (el && el.value||'').trim(); };
   const showToast = (msg) => { toast.textContent = msg; toast.hidden = false; setTimeout(()=>toast.hidden=true, 1600); };
-
   // ===== 車両キー（station|plate_full|model 単位で分離保存） =====
   function vehicleKey(){
     const st = gv('[name="station"]');
@@ -100,6 +100,7 @@
       if(prev && prev[id] != null && String(prev[id]).trim() !== ''){
         raw = prev[id];
       }
+     
       
       if(raw === null){
         // fallback placeholder
@@ -109,7 +110,8 @@
           // tread depth: ensure one decimal place (5 -> 5.0)
           const num = parseFloat(raw);
           if(!isNaN(num)){
-            v = num.toFixed(1);
+            v 
+            = num.toFixed(1);
           }else{
             v = String(raw).trim();
           }
@@ -118,6 +120,7 @@
           const s = String(raw).trim();
           v = s.padStart(4, '0');
         }else{
+  
           // other values (pressure): use as is
           v = String(raw).trim();
         }
@@ -169,7 +172,7 @@
   // ===== 送信（POST / doPost, x-www-form-urlencoded） =====
   async function postToSheet(){
     if(!SHEETS_URL){ showToast('送信先未設定');
-      return; }
+    return; }
     const payload = collectPayload();
     try{
       const body = new URLSearchParams();
@@ -191,6 +194,33 @@
     }
   }
 
+  async function postLockTimeOnly(){
+    if(!SHEETS_URL){ showToast('送信先未設定'); return; }
+    const payload = {
+      mode: 'lock_only',
+      station: gv('[name="station"]'),
+      plate_full: gv('[name="plate_full"]'),
+      model: gv('[name="model"]'),
+      lock: lockTimeEl.textContent || ''
+    };
+    try{
+      const body = new URLSearchParams();
+      body.set('key', SHEETS_KEY);
+      body.set('json', JSON.stringify(payload));
+      const res = await fetch(SHEETS_URL, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
+        body
+      });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const j = await res.json().catch(()=>({ok:true}));
+      if(j && j.ok) showToast('施錠時刻を送信しました'); else showToast('送信エラー');
+    }catch(err){
+      console.error(err);
+      showToast('送信失敗');
+    }
+  }
+
   function collectPayload(){
     const obj = {
       station: gv('[name="station"]'),
@@ -202,6 +232,7 @@
       tread_lf: gv('#tread_lf'), pre_lf: gv('#pre_lf'), dot_lf: gv('#dot_lf'),
       tread_lr: gv('#tread_lr'), pre_lr: gv('#pre_lr'), dot_lr: gv('#dot_lr'),
       tread_rr: gv('#tread_rr'), pre_rr: gv('#pre_rr'), dot_rr: gv('#dot_rr'),
+ 
       unlock: unlockTimeEl.textContent||'',
       lock:   lockTimeEl.textContent||'',
       operator: ''
@@ -233,7 +264,8 @@
   // URLに station/plate_full/model が含まれていたら自動セット
   function applyUrl(){
     const p = new URLSearchParams(location.search);
-    const set = (name) => { const v = p.get(name); if(v){ const el = qs(`[name="${name}"]`); if(el){ el.value = v; } } };
+    const set = (name) => { const v = p.get(name); if(v){ const el = qs(`[name="${name}"]`); if(el){ el.value = v;
+    } } };
     ['station','plate_full','model'].forEach(set);
   }
 
@@ -246,7 +278,6 @@
         el.addEventListener('input',  h, {passive:true});
       });
     });
-
     // 修正: 解錠時刻記録後に完了ボタンへスクロール＆フォーカス
     unlockBtn?.addEventListener('click', ()=> {
       stampNow(unlockTimeEl);
@@ -255,8 +286,12 @@
         submitBtn.focus();
       }
     });
-
-    lockBtn?.addEventListener('click',   ()=> stampNow(lockTimeEl));
+    lockBtn?.addEventListener('click',   ()=> {
+      if(window.confirm("施錠完了でよろしいですか？")){
+        stampNow(lockTimeEl);
+        postLockTimeOnly();
+      }
+    });
     // sendBtn is unused in v7f;
     // form submission handles sending
   }
@@ -339,13 +374,15 @@
         const rule = FIELD_RULES[id];
         if(!rule) return;
         let raw = ev.target.value;
-        
+   
+              
         const digits = raw.replace(/\D/g, '');
         if(rule.decimal){
           // for tread fields, only convert if decimal not already set and we have required digits
           if(!raw.includes('.') && digits.length >= rule.len){
             const truncated = digits.slice(0, rule.len);
             const formatted = formatTread(truncated);
+     
             ev.target.value = formatted;
             focusNext(id);
           }
@@ -385,7 +422,8 @@
         let header = '';
         if(p.station) header += p.station + '\n';
         header += p.plate_full + '\n' + p.model;
-        
+       
+          
         if(resHeader) resHeader.textContent = header;
         // update times display
         if(resTimes) resTimes.innerHTML = `解錠　${p.unlock || '--:--'}<br>施錠　${p.lock || '--:--'}`;
@@ -393,9 +431,11 @@
         const lines = [];
         if(p.std_f && p.std_r) lines.push(`${p.std_f}-${p.std_r}`);
         lines.push(`${p.tread_rf || ''} ${p.pre_rf || ''} ${p.dot_rf || ''}   RF`);
+   
         lines.push(`${p.tread_lf || ''} ${p.pre_lf || ''} ${p.dot_lf || ''}   LF`);
         lines.push(`${p.tread_lr || ''} ${p.pre_lr || ''} ${p.dot_lr || ''}   LR`);
-        lines.push(`${p.tread_rr || ''} ${p.pre_rr || ''} ${p.dot_rr || ''}   RR`);
+        lines.push(`${p.tread_rr ||
+        ''} ${p.pre_rr || ''} ${p.dot_rr || ''}   RR`);
         lines.push('');
         lines.push(nowJST());
         if(resLines) resLines.textContent = lines.join('\n');
