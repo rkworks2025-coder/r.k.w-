@@ -5,7 +5,6 @@
 
   // ===== 要素 =====
   const form = document.getElementById('form');
-  // submitBtn handles final submit to show result; sendBtn is not used in v7f
   const submitBtn = document.getElementById('submitBtn');
   const unlockBtn = document.getElementById('unlockBtn');
   const lockBtn   = document.getElementById('lockBtn');
@@ -24,14 +23,14 @@
   // ===== ユーティリティ =====
   const qs = (s, root=document) => root.querySelector(s);
   const gv = (sel) => { const el = typeof sel==='string'? qs(sel): sel; return (el && el.value||'').trim(); };
-  const showToast = (msg) => { toast.textContent = msg; toast.hidden = false; setTimeout(()=>toast.hidden=true, 1600); };
+  const showToast = (msg) => { toast.textContent = msg; toast.hidden = false; setTimeout(()=>toast.hidden=true, 2500); };
+  
   // ===== 車両キー（station|plate_full|model 単位で分離保存） =====
   function vehicleKey(){
     const st = gv('[name="station"]');
     const pf = gv('[name="plate_full"]');
     const md = gv('[name="model"]');
-    // include version to avoid cross-version storage collisions
-    return `v7i:${encodeURIComponent(st)}|${encodeURIComponent(pf)}|${encodeURIComponent(md)}`;
+    return `v8a:${encodeURIComponent(st)}|${encodeURIComponent(pf)}|${encodeURIComponent(md)}`;
   }
 
   // ===== 解錠/施錠 時刻 永続化（車両単位） =====
@@ -76,52 +75,40 @@
     'tread_rr','pre_rr','dot_rr'
   ];
   function fallbackFor(id){
-    // return placeholder strings without decimal or spaces for compact display
     if(id.startsWith('tread')) return '--';
     if(id.startsWith('pre'))   return '---';
     return '----';
   }
   function showPrevPlaceholders(){
-    // show placeholders as (xx) without spaces or "前回" to minimize width
     document.querySelectorAll('.prev-val').forEach(span=>{
       const id = span.getAttribute('data-for');
       span.textContent = `(${fallbackFor(id)})`;
     });
   }
   function applyPrev(prev){
-    // apply previous values;
-    // display as (value) without spaces or "前回" to keep label one-line
     FIELDS.forEach(id => {
       const span = document.querySelector(`.prev-val[data-for="${id}"]`);
       if(!span) return;
       let v = '';
-      // determine the raw value if present and non-empty
       let raw = null;
       if(prev && prev[id] != null && String(prev[id]).trim() !== ''){
         raw = prev[id];
       }
-     
       
       if(raw === null){
-        // fallback placeholder
         v = fallbackFor(id);
       } else {
         if(id.startsWith('tread')){
-          // tread depth: ensure one decimal place (5 -> 5.0)
           const num = parseFloat(raw);
           if(!isNaN(num)){
-            v 
-            = num.toFixed(1);
+            v = num.toFixed(1);
           }else{
             v = String(raw).trim();
           }
         }else if(id.startsWith('dot')){
-          // DOT (manufacture week): pad to 4 digits with leading zeros
           const s = String(raw).trim();
           v = s.padStart(4, '0');
         }else{
-  
-          // other values (pressure): use as is
           v = String(raw).trim();
         }
       }
@@ -131,7 +118,6 @@
 
   // ===== 取得（GET / doGet） =====
   async function fetchSheetData(){
-    // 前回データ読み込みのタイミングで時刻表示をリセット
     if (unlockTimeEl) unlockTimeEl.textContent = '--:--';
     if (lockTimeEl) lockTimeEl.textContent = '--:--';
 
@@ -139,25 +125,20 @@
     const md = gv('[name="model"]');
     const pf = gv('[name="plate_full"]');
     if(!(st||md||pf)) return;
-    // 何も無ければ問い合わせない
     if(!SHEETS_URL) return;
     const u = new URL(SHEETS_URL);
     u.searchParams.set('key', SHEETS_KEY);
     u.searchParams.set('op','read');
-    // GAS側は実質未使用でも害なし
     u.searchParams.set('sheet','Tirelog');
-    // 同上
     if(st) u.searchParams.set('station', st);
     if(md) u.searchParams.set('model', md);
     if(pf) u.searchParams.set('plate_full', pf);
     u.searchParams.set('ts', Date.now());
-    // キャッシュ回避
 
     try{
       const res = await fetch(u.toString(), { cache:'no-store' });
       if(!res.ok) throw new Error('HTTP '+res.status);
       const data = await res.json();
-      // 規定圧（未入力時だけ上書き）
       const f = qs('[name="std_f"]'); const r = qs('[name="std_r"]');
       if(data.std_f && f && !f.value) f.value = data.std_f;
       if(data.std_r && r && !r.value) r.value = data.std_r;
@@ -165,14 +146,12 @@
       applyPrev(data.prev || {});
     }catch(err){
       console.warn('fetchSheetData failed', err);
-      // 失敗時はプレースホルダのまま
     }
   }
 
   // ===== 送信（POST / doPost, x-www-form-urlencoded） =====
   async function postToSheet(){
-    if(!SHEETS_URL){ showToast('送信先未設定');
-    return; }
+    if(!SHEETS_URL){ showToast('送信先未設定'); return; }
     const payload = collectPayload();
     try{
       const body = new URLSearchParams();
@@ -237,39 +216,29 @@
       lock:   lockTimeEl.textContent||'',
       operator: ''
     };
-    // attach a formatted timestamp for the spreadsheet. Use JST and format as YYYY/MM/DD H:mm:ss
     obj.timestamp_iso = timestampForSheet();
     return obj;
   }
 
-  /**
-   * Returns current time in JST formatted as "YYYY/MM/DD H:mm:ss".
-   * Hours are not zero‑padded to mirror the older spreadsheet entries (e.g. 2025/09/17 1:38:14).
-   */
   function timestampForSheet(){
     const d = new Date();
-    // convert to JST by adjusting timezone offset (JST = UTC+9)
     const utc = d.getTime() + d.getTimezoneOffset() * 60000;
     const jst = new Date(utc + 9 * 60 * 60000);
     const y  = jst.getFullYear();
     const m  = String(jst.getMonth() + 1).padStart(2, '0');
     const day = String(jst.getDate()).padStart(2, '0');
-    // do not pad hours to avoid leading zero for 0–9 hours
     const h  = String(jst.getHours());
     const mi = String(jst.getMinutes()).padStart(2, '0');
     const s  = String(jst.getSeconds()).padStart(2, '0');
     return `${y}/${m}/${day} ${h}:${mi}:${s}`;
   }
 
-  // URLに station/plate_full/model が含まれていたら自動セット
   function applyUrl(){
     const p = new URLSearchParams(location.search);
-    const set = (name) => { const v = p.get(name); if(v){ const el = qs(`[name="${name}"]`); if(el){ el.value = v;
-    } } };
+    const set = (name) => { const v = p.get(name); if(v){ const el = qs(`[name="${name}"]`); if(el){ el.value = v; } } };
     ['station','plate_full','model'].forEach(set);
   }
 
-  // 変更監視：車両切替→時刻キーも切替、取得も即時
   function wire(){
     ['station','plate_full','model'].forEach(name =>{
       document.querySelectorAll(`[name="${name}"]`).forEach(el=>{
@@ -278,7 +247,6 @@
         el.addEventListener('input',  h, {passive:true});
       });
     });
-    // 修正: 解錠時刻記録後に完了ボタンへスクロール＆フォーカス
     unlockBtn?.addEventListener('click', ()=> {
       stampNow(unlockTimeEl);
       if(submitBtn){
@@ -292,12 +260,9 @@
         postLockTimeOnly();
       }
     });
-    // sendBtn is unused in v7f;
-    // form submission handles sending
   }
 
   // ===== オートアドバンス =====
-  // sequence of elements to focus in order, including standard pressure, tires and the unlock button
   const AUTO_SEQUENCE = [
     'std_f','std_r',
     'tread_rf','pre_rf','dot_rf',
@@ -306,8 +271,6 @@
     'tread_rr','pre_rr','dot_rr',
     'unlockBtn'
   ];
-  // rules defining the expected length of input for each field;
-  // decimal:true indicates 0.1 precision (two digits)
   const FIELD_RULES = {
     std_f: {len:3},
     std_r: {len:3},
@@ -324,17 +287,15 @@
     pre_rr: {len:3},
     dot_rr: {len:4}
   };
-  // convert two-digit tread input into a decimal with one decimal place
+
   function formatTread(raw){
     const num = parseInt(raw, 10);
     if(isNaN(num)) return '';
     return (num / 10).toFixed(1);
   }
 
-  // current date/time in JST (MM/DD HH:mm)
   function nowJST(){
     const d = new Date();
-    // convert to JST by adding timezone offset (9 hours)
     const utc  = d.getTime() + d.getTimezoneOffset() * 60000;
     const jst  = new Date(utc + 9 * 60 * 60000);
     const mm   = String(jst.getMonth() + 1).padStart(2, '0');
@@ -344,7 +305,6 @@
     return mm + '/' + dd + ' ' + HH + ':' + MM;
   }
 
-  // focus the next element in the sequence after the given id
   function focusNext(currentId){
     const idx = AUTO_SEQUENCE.indexOf(currentId);
     if(idx < 0) return;
@@ -353,7 +313,6 @@
     if(nextId === 'unlockBtn'){
       const btn = document.getElementById('unlockBtn');
       if(btn) {
-        // iPhone Safariでのスクロールロックを打破するため、強制スクロール命令を追加
         btn.scrollIntoView({ behavior: 'auto', block: 'center' });
         btn.focus();
       }
@@ -363,26 +322,20 @@
     if(nextEl) nextEl.focus();
   }
 
-  // setup auto-advance listeners on each relevant input
   function setupAutoAdvance(){
     AUTO_SEQUENCE.forEach(id => {
       if(id === 'unlockBtn') return;
       const el = document.getElementById(id) || document.querySelector(`[name="${id}"]`);
       if(!el) return;
-      // handle input event for length-based advance
       el.addEventListener('input', ev => {
         const rule = FIELD_RULES[id];
         if(!rule) return;
         let raw = ev.target.value;
-   
-              
         const digits = raw.replace(/\D/g, '');
         if(rule.decimal){
-          // for tread fields, only convert if decimal not already set and we have required digits
           if(!raw.includes('.') && digits.length >= rule.len){
             const truncated = digits.slice(0, rule.len);
             const formatted = formatTread(truncated);
-     
             ev.target.value = formatted;
             focusNext(id);
           }
@@ -394,7 +347,6 @@
           }
         }
       });
-      // allow enter key to advance
       el.addEventListener('keydown', ev => {
         if(ev.key === 'Enter'){
           ev.preventDefault();
@@ -404,50 +356,87 @@
     });
   }
 
+  // 簡易的な現在の週番号計算 (ISO準拠)
+  const getWeek = (date) => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  };
+
   function init(){
     applyUrl();
     showPrevPlaceholders();
-    loadTimes();          // 同一車両なら復元、切替なら空へ
+    loadTimes();
     fetchSheetData();
-    // 規定圧＆前回値取得
     wire();
-    // initialize auto-advance for inputs
     setupAutoAdvance();
-    // handle form submission: build result view and send data
+    
     if(form){
       form.addEventListener('submit', async ev => {
         ev.preventDefault();
+
+        // ===== WWYY (週週年年) バリデーション =====
+        const now = new Date();
+        const currentYear2Digit = Number(String(now.getFullYear()).slice(-2));
+        const currentWeek = getWeek(now);
+        const tires = ['rf', 'lf', 'lr', 'rr'];
+        
+        for (const pos of tires) {
+          const dotVal = gv(`#dot_${pos}`);
+          if (!dotVal) continue;
+
+          if (dotVal.length !== 4) {
+            showToast(`${pos.toUpperCase()}の製造年週は4桁で入力してください`);
+            return; // 送信中止
+          }
+
+          const ww = parseInt(dotVal.substring(0, 2), 10);
+          const yy = parseInt(dotVal.substring(2, 4), 10);
+
+          if (ww < 1 || ww > 53) {
+            showToast(`${pos.toUpperCase()}の製造週が不正です(${ww})`);
+            return;
+          }
+          if (yy > currentYear2Digit) {
+            showToast(`${pos.toUpperCase()}の製造年が未来になっています(${yy})`);
+            return;
+          }
+          if (yy === currentYear2Digit && ww > currentWeek) {
+            showToast(`${pos.toUpperCase()}の製造週が未来になっています(${ww})`);
+            return;
+          }
+        }
+        // ===========================================
+
         const p = collectPayload();
-        // update result header (station optional)
         let header = '';
         if(p.station) header += p.station + '\n';
         header += p.plate_full + '\n' + p.model;
        
-          
         if(resHeader) resHeader.textContent = header;
-        // update times display
         if(resTimes) resTimes.innerHTML = `解錠　${p.unlock || '--:--'}<br>施錠　${p.lock || '--:--'}`;
-        // build result lines (normative row placed between times and RF)
+        
         const lines = [];
         if(p.std_f && p.std_r) lines.push(`${p.std_f}-${p.std_r}`);
         lines.push(`${p.tread_rf || ''} ${p.pre_rf || ''} ${p.dot_rf || ''}   RF`);
-   
         lines.push(`${p.tread_lf || ''} ${p.pre_lf || ''} ${p.dot_lf || ''}   LF`);
         lines.push(`${p.tread_lr || ''} ${p.pre_lr || ''} ${p.dot_lr || ''}   LR`);
-        lines.push(`${p.tread_rr ||
-        ''} ${p.pre_rr || ''} ${p.dot_rr || ''}   RR`);
+        lines.push(`${p.tread_rr || ''} ${p.pre_rr || ''} ${p.dot_rr || ''}   RR`);
         lines.push('');
         lines.push(nowJST());
+        
         if(resLines) resLines.textContent = lines.join('\n');
-        // toggle views
+        
         if(form) form.style.display = 'none';
         if(resultCard) resultCard.style.display = 'block';
         window.scrollTo({top:0, behavior:'smooth'});
-        // send data to GAS
+        
         await postToSheet();
       });
     }
-    // handle back button: return to input form
+    
     if(backBtn){
       backBtn.addEventListener('click', () => {
         if(resultCard) resultCard.style.display = 'none';
