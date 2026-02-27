@@ -13,9 +13,7 @@ label{ display:block; font-size:12px; color:var(--muted); }
 input{ width:100%; padding:10px 12px; margin-top:4px; border-radius:10px; border:1px solid #333; background:#121212; color:#fff; font-size:16px; }
 .grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:10px; }
 .inline .cap{ display:flex; justify-content:space-between; align-items:center; gap:6px; font-size:12px; color:var(--muted); }
-/* keep label and previous value on a single line */
 .cap{ white-space:nowrap; }
-/* increase font size of previous value to improve legibility */
 .cap .prev-val{
   color:var(--brand);
   font-size:14px;
@@ -26,7 +24,6 @@ input{ width:100%; padding:10px 12px; margin-top:4px; border-radius:10px; border
 .stamp-title{ font-weight:700; }
 .stamp-btn{ padding:6px 10px; background:#222; color:#fff; border:1px solid #333; border-radius:8px; }
 .stamp-time{ font-size:22px; text-align:center; letter-spacing:1px; }
-/* generic button styles */
 .btn{
   appearance:none;
   border:1px solid #333;
@@ -42,25 +39,21 @@ input{ width:100%; padding:10px 12px; margin-top:4px; border-radius:10px; border
   color:#000;
   border-color:var(--brand);
 }
-/* form footer section */
 .foot{
   display:flex;
   gap:8px;
   flex-wrap:wrap;
 }
-/* section divider for foot */
 .section{
   margin-top:6px;
   padding-top:6px;
   border-top:1px dashed #333;
 }
-/* mono font for result display */
 .mono{
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   white-space: pre-wrap;
   color:var(--fg);
 }
-/* result card font sizes */
 #resultCard{
   font-size:22px;
 }
@@ -75,69 +68,46 @@ input{ width:100%; padding:10px 12px; margin-top:4px; border-radius:10px; border
   font-size:1.15em;
   line-height:1.55;
 }
-.toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:16px; background:#222; border:1px solid #333; color:#fff; padding:10px 14px; border-radius:10px; }
+.toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:16px; background:#222; border:1px solid #333; color:#fff; padding:10px 14px; border-radius:10px; z-index:999; }
 
-/* === Tire list layout === */
 .tire-list{
   display:grid;
   gap:10px;
   margin-top:10px;
 }
-
 .tire-row{
   display:grid;
   grid-template-columns: 1fr 1fr 1fr 48px;
   gap:10px;
   align-items:end;
 }
-
 .lab{
   font-weight:700;
   text-align:right;
   color:var(--muted);
   padding-bottom:4px;
 }
-
-/* allow inline groups to stack label and input vertically */
 .inline{
   display:grid;
   gap:2px;
 }
 
-/* Update V7L: スマホ(幅480px以下)向け極限圧縮レイアウト */
 @media (max-width: 480px) {
-  /* 外枠・カード余白の削減 */
   .wrap { padding: 2px; }
   .card { padding: 6px; }
-  
-  /* 行間・要素間の隙間を削減 */
   .veh-row2 { gap: 4px; }
   .std-row { gap: 4px; margin-top: 4px; }
   .time-stamp { gap: 4px; margin-top: 4px; }
-  .tire-list { gap: 2px; margin-top: 4px; } /* 行間を極力詰める */
+  .tire-list { gap: 2px; margin-top: 4px; }
   .tire-row { gap: 2px; }
-  
-  /* 見出しの余白削減 */
   .title { margin: 4px 0 2px; font-size: 14px; }
-  
-  /* 入力欄の高さ削減 */
-  input {
-    padding: 6px 4px; /* 上下左右を詰める */
-    margin-top: 1px;  /* ラベルとの隙間を詰める */
-    font-size: 16px;  /* 文字サイズは維持 */
-  }
-  
-  /* ラベルの微調整 */
+  input { padding: 6px 4px; margin-top: 1px; font-size: 16px; }
   label { font-size: 11px; padding-bottom: 0; }
-  
-  /* タイムスタンプカードの圧縮 */
   .stamp-card { padding: 4px; }
   .stamp-head { margin-bottom: 2px; }
   .stamp-time { font-size: 18px; line-height: 1.2; }
   .stamp-btn { padding: 4px 8px; font-size: 12px; }
-  
-  /* ボタン類の余白調整 */
   .foot { gap: 4px; }
   .btn { padding: 8px 10px; }
-  .lab { font-size: 12px; padding-bottom: 6px; } /* タイヤ位置表示の位置調整 */
+  .lab { font-size: 12px; padding-bottom: 6px; }
 }
